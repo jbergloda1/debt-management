@@ -69,6 +69,8 @@ export const obligationSchema = z.discriminatedUnion('kind', [
     statementDay: day,
     dueRule: dueDateRuleSchema,
     annualRate: rate.optional(),
+    annualRateMax: rate.optional(),
+    lateFee: z.object({ percent: rate, floor: money.optional() }).optional(),
     minimumPayment: z.object({ percentOfStatement: rate, floor: money.optional(), includeInstallmentsInFull: z.boolean() }).optional(),
     paymentPolicy: policy.optional(),
   }),

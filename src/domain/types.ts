@@ -128,6 +128,12 @@ export interface MinimumPaymentRule {
   includeInstallmentsInFull: boolean;
 }
 
+/** Phí chậm thanh toán: % số tiền tối thiểu chưa trả khi quá hạn, không thấp hơn floor. */
+export interface LateFeeRule {
+  percent: Rate;
+  floor?: Money;
+}
+
 export interface CreditCardObligation extends ObligationBase {
   kind: 'credit_card';
   creditLineId: ID;
@@ -135,6 +141,9 @@ export interface CreditCardObligation extends ObligationBase {
   statementDay: number;
   dueRule: DueDateRule;
   annualRate?: Rate;
+  /** Lãi suất cao nhất khi ngân hàng công bố một khoảng (vd. 2–3,19%/tháng); annualRate là mức thấp */
+  annualRateMax?: Rate;
+  lateFee?: LateFeeRule;
   minimumPayment?: MinimumPaymentRule;
   paymentPolicy?: CardPaymentPolicy;
 }

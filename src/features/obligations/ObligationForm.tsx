@@ -42,6 +42,10 @@ const PICK = '__pick';
 
 type PolicyChoice = 'inherit' | 'current_balance' | 'statement_balance' | 'minimum' | 'fixed';
 
+/** Thẻ lưu lãi theo năm; ngân hàng công bố theo tháng. */
+const perMonth = (annual?: number) => (annual === undefined ? undefined : annual / 12);
+const perYear = (monthly?: number) => (monthly === undefined ? undefined : Math.round(monthly * 12 * 1e8) / 1e8);
+
 function blank(kind: ObligationKind, profileId: string, institutionId: string, today: string, inst?: Institution): Obligation {
   const base = { id: newId('ob'), profileId, institutionId, name: '', status: 'active' as const, createdAt: today };
   switch (kind) {
@@ -412,7 +416,12 @@ export function ObligationForm({ initial, onClose }: { initial?: Obligation; onC
                     }
                   />
                 </Field>
-                <Field label="Lãi suất thẻ/năm"><PercentInput value={ob.annualRate} onChange={(annualRate) => set({ annualRate })} /></Field>
+                <Field label="Lãi suất thẻ/tháng" hint="Ghi trên biểu phí, vd. 3,54">
+                  <PercentInput value={perMonth(ob.annualRate)} onChange={(v) => set({ annualRate: perYear(v) })} />
+                </Field>
+                <Field label="Lãi cao nhất/tháng (nếu là khoảng)" hint="Vd. 2–3,19%: nhập 2 ở trên, 3,19 ở đây">
+                  <PercentInput value={perMonth(ob.annualRateMax)} onChange={(v) => set({ annualRateMax: perYear(v) })} />
+                </Field>
                 <Field label="Cách trả thẻ">
                   <Select<PolicyChoice>
                     value={policyChoice}
@@ -436,22 +445,27 @@ export function ObligationForm({ initial, onClose }: { initial?: Obligation; onC
                     <MoneyInput value={ob.paymentPolicy.amount} onChange={(v) => set({ paymentPolicy: { type: 'fixed', amount: v ?? 0 } })} />
                   </Field>
                 )}
-                {ob.paymentPolicy === 'minimum' && (
-                  <>
-                    <Field label="Tối thiểu % sao kê">
-                      <PercentInput
-                        value={ob.minimumPayment?.percentOfStatement ?? 0.05}
-                        onChange={(v) => set({ minimumPayment: { includeInstallmentsInFull: true, ...ob.minimumPayment, percentOfStatement: v ?? 0 } })}
-                      />
-                    </Field>
-                    <Field label="Tối thiểu tuyệt đối">
-                      <MoneyInput
-                        value={ob.minimumPayment?.floor}
-                        onChange={(floor) => set({ minimumPayment: { percentOfStatement: 0.05, includeInstallmentsInFull: true, ...ob.minimumPayment, floor } })}
-                      />
-                    </Field>
-                  </>
-                )}
+                <Field label="Thanh toán tối thiểu % sao kê">
+                  <PercentInput
+                    value={ob.minimumPayment?.percentOfStatement ?? 0.05}
+                    onChange={(v) => set({ minimumPayment: { includeInstallmentsInFull: true, ...ob.minimumPayment, percentOfStatement: v ?? 0 } })}
+                  />
+                </Field>
+                <Field label="Tối thiểu ít nhất (số tiền)">
+                  <MoneyInput
+                    value={ob.minimumPayment?.floor}
+                    onChange={(floor) => set({ minimumPayment: { percentOfStatement: 0.05, includeInstallmentsInFull: true, ...ob.minimumPayment, floor } })}
+                  />
+                </Field>
+                <Field label="Phí chậm thanh toán %" hint="Tính trên số tối thiểu chưa trả khi quá hạn">
+                  <PercentInput
+                    value={ob.lateFee?.percent}
+                    onChange={(percent) => set({ lateFee: percent === undefined ? undefined : { ...ob.lateFee, percent } })}
+                  />
+                </Field>
+                <Field label="Phí chậm thanh toán ít nhất">
+                  <MoneyInput value={ob.lateFee?.floor} onChange={(floor) => set({ lateFee: { percent: 0, ...ob.lateFee, floor } })} />
+                </Field>
               </>
             )}
             {ob.kind === 'revolving' && (

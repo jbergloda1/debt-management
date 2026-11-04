@@ -165,8 +165,8 @@ export function createEngine(state: ProfileState, today: ISODate): Engine {
   return engine;
 }
 
-/** Thanh toán tối thiểu (chỉ dùng khi policy = 'minimum'). */
-function minimumDue(engine: Engine, ob: CreditCardObligation, st: Statement): Money {
+/** Thanh toán tối thiểu của sao kê: số ngân hàng ghi, nếu không thì theo quy tắc tối thiểu của thẻ. */
+export function minimumDue(engine: Engine, ob: CreditCardObligation, st: Statement): Money {
   if (st.minimumDue !== undefined) return st.minimumDue;
   const rule = ob.minimumPayment ?? { percentOfStatement: 0.05, includeInstallmentsInFull: true };
   const cycle = monthOf(st.dueDate);

@@ -70,7 +70,10 @@ export const appendixA: ProfileState = {
       name: 'Thẻ Sacombank',
       statementDay: 10,
       dueRule: { type: 'statement_fixed_due', statementDay: 10, dueDay: 5 },
-      annualRate: 0.3,
+      // 2–3,19%/tháng; phí chậm thanh toán 6%, tối thiểu 200.000
+      annualRate: 0.24,
+      annualRateMax: 0.3828,
+      lateFee: { percent: 0.06, floor: 200000 },
       paymentPolicy: 'current_balance',
     },
     {
@@ -82,6 +85,9 @@ export const appendixA: ProfileState = {
       name: 'Thẻ VIB',
       statementDay: 25,
       dueRule: { type: 'statement_offset', statementDay: 25, daysAfterStatement: 15 },
+      // 3,54%/tháng; tối thiểu 5%
+      annualRate: 0.4248,
+      minimumPayment: { percentOfStatement: 0.05, includeInstallmentsInFull: true },
       paymentPolicy: 'current_balance',
     },
     sacLoan('sac-1', 'Vay tiêu dùng 1', '2026-05-20', 8000000, 5, 0.012, 4),
@@ -161,6 +167,7 @@ export const appendixA: ProfileState = {
       dueDate: '2026-11-09',
       statementBalance: 7246783,
       currentBalance: 7246783,
+      minimumDue: 3570681,
       capturedAt: '2026-11-01',
     },
   ],

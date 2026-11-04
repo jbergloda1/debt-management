@@ -4,6 +4,7 @@ import { creditLineUsage } from '../../domain/creditLine';
 import type { Obligation } from '../../domain/types';
 import { useEngine, useFmt, useProfile } from '../../state/hooks';
 import { useNav } from '../../state/nav';
+import { CardCostPanel } from './CardCostPanel';
 import { StatementsPanel } from './StatementsPanel';
 
 function partLabel(kind: 'card' | 'linked', ob?: Obligation) {
@@ -63,7 +64,10 @@ export function CardsPage() {
               </tbody>
             </table>
             {cards.map((c) => (
-              <StatementsPanel key={c.id} ob={c} />
+              <div key={c.id} className="stack">
+                <StatementsPanel ob={c} />
+                {c.kind === 'credit_card' && <CardCostPanel card={c} />}
+              </div>
             ))}
           </section>
         );
