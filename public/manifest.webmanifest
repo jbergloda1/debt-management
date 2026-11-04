@@ -1,0 +1,21 @@
+{
+  "name": "Debt Manager — Quản lý nợ",
+  "short_name": "Quản lý nợ",
+  "description": "Theo dõi thẻ tín dụng, vay trả góp: tháng này trả bao nhiêu, khi nào hết nợ. Dữ liệu chỉ lưu trên thiết bị.",
+  "lang": "vi",
+  "start_url": "./#/dashboard",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7f6",
+  "theme_color": "#0d9488",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Tổng quan", "url": "./#/dashboard" },
+    { "name": "Lịch đến hạn", "url": "./#/calendar" }
+  ]
+}

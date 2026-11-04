@@ -7,6 +7,7 @@ import type { CardPaymentPolicy, LoanDebtMeasure, ProfileSettings, WeekendShift 
 import { useEngine, useProfile, useUpdate } from '../../state/hooks';
 import { readLegacyV1, useStore } from '../../state/store';
 import { cloneProfile, importProfileJson } from './importExport';
+import { RemindersPanel } from './RemindersPanel';
 
 const CURRENCIES = [
   { value: 'VND', label: 'VND — Việt Nam đồng' },
@@ -139,6 +140,8 @@ export function Settings() {
         <Check checked={s.groupByDate} onChange={(groupByDate) => setS({ groupByDate })}>Gộp các khoản cùng tổ chức, cùng ngày trên Dashboard</Check>
         <Check checked={store.privacy} onChange={store.setPrivacy}>Chế độ riêng tư — ẩn số tiền (•••) khi chia sẻ màn hình</Check>
       </section>
+
+      <RemindersPanel />
 
       <section className="panel">
         <h2>Xuất / nhập</h2>

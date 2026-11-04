@@ -1,6 +1,8 @@
 import { defineConfig } from '@playwright/test';
 
-const PORT = 5174;
+const DEV = 5174;
+// Service worker chỉ đăng ký ở bản build → test PWA chạy trên `vite preview`
+const PREVIEW = 5175;
 
 export default defineConfig({
   testDir: './e2e',
@@ -9,7 +11,6 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: `http://localhost:${PORT}/`,
     // Dùng Chrome đã cài trên máy, không cần `npx playwright install`
     channel: 'chrome',
     locale: 'vi-VN',
@@ -18,10 +19,22 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  webServer: {
-    command: `npm run dev -- --port ${PORT} --strictPort`,
-    url: `http://localhost:${PORT}/`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
-  },
+  projects: [
+    { name: 'app', testIgnore: /pwa\.spec\.ts/, use: { baseURL: `http://localhost:${DEV}/` } },
+    { name: 'pwa', testMatch: /pwa\.spec\.ts/, use: { baseURL: `http://localhost:${PREVIEW}/`, serviceWorkers: 'allow' } },
+  ],
+  webServer: [
+    {
+      command: `npm run dev -- --port ${DEV} --strictPort`,
+      url: `http://localhost:${DEV}/`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+    },
+    {
+      command: `npm run build && npx vite preview --port ${PREVIEW} --strictPort`,
+      url: `http://localhost:${PREVIEW}/`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
 });

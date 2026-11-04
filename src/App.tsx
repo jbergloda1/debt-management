@@ -15,6 +15,7 @@ import { Settings } from './features/settings/Settings';
 import { useAlerts, useProfile, useUpdate } from './state/hooks';
 import { useNav, type Page } from './state/nav';
 import { useStore } from './state/store';
+import { useReminderSync } from './state/reminders';
 
 const NAV: { page: Page; label: string }[] = [
   { page: 'dashboard', label: 'Tổng quan' },
@@ -53,6 +54,7 @@ function Shell() {
   const { profiles, switchProfile, privacy, setPrivacy, today } = useStore();
   const { page, id, go } = useNav();
   const alerts = useAlerts();
+  useReminderSync();
   const urgent = alerts.filter((a) => a.level === 'error').length;
   const setMonth = (viewMonth: string) => update((s) => ({ ...s, viewMonth }));
 

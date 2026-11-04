@@ -7,6 +7,7 @@ import type { ID, Profile, ProfileState } from '../domain/types';
 
 export const LEGACY_V1_KEY = 'debt-manager:v1';
 const ACTIVE_KEY = 'activeProfileId';
+const NOTIFY_KEY = 'notifyEnabled';
 
 interface AppStore {
   ready: boolean;
@@ -14,6 +15,8 @@ interface AppStore {
   state: ProfileState | null;
   today: string;
   privacy: boolean;
+  /** Nhắc hạn bằng thông báo trên thiết bị này (lưu trong meta, không theo profile) */
+  notifyEnabled: boolean;
   notice?: string;
   init(): Promise<void>;
   update(fn: (s: ProfileState) => ProfileState): void;
@@ -24,11 +27,15 @@ interface AppStore {
   switchProfile(id: ID): Promise<void>;
   deleteProfile(id: ID): Promise<void>;
   setPrivacy(on: boolean): void;
+  setNotifyEnabled(on: boolean): Promise<void>;
   setNotice(msg?: string): void;
 }
 
 let adapter: StorageAdapter;
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Kho lưu trữ đang dùng (sau init) — cho các phần cần meta như nhắc hạn. */
+export const storage = (): StorageAdapter => adapter;
 
 async function loadProfile(id: ID): Promise<ProfileState | null> {
   const raw = await adapter.load(id);
@@ -47,6 +54,7 @@ export const useStore = create<AppStore>((set, get) => ({
   state: null,
   today: todayISO(),
   privacy: false,
+  notifyEnabled: false,
 
   async init() {
     if (adapter) return; // StrictMode gọi effect hai lần
@@ -62,7 +70,8 @@ export const useStore = create<AppStore>((set, get) => ({
         notice = `Không đọc được profile: ${(e as Error).message}`;
       }
     }
-    set({ ready: true, profiles, state, notice });
+    const notifyEnabled = (await adapter.getMeta<boolean>(NOTIFY_KEY)) ?? false;
+    set({ ready: true, profiles, state, notice, notifyEnabled });
     // Cập nhật "hôm nay" khi qua ngày mới mà app vẫn mở
     setInterval(() => {
       const t = todayISO();
@@ -118,6 +127,10 @@ export const useStore = create<AppStore>((set, get) => ({
   },
 
   setPrivacy: (privacy) => set({ privacy }),
+  async setNotifyEnabled(on) {
+    await adapter.setMeta(NOTIFY_KEY, on);
+    set({ notifyEnabled: on });
+  },
   setNotice: (notice) => set({ notice }),
 }));
 
