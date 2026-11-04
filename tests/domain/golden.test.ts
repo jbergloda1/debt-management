@@ -21,7 +21,7 @@ describe('Phụ lục A — tháng 11/2026', () => {
 
   it('từng dòng', () => {
     expect(row('card-sac')).toMatchObject({ amount: 8366746, debtRemaining: 8366746, state: 'due_soon', dueDate: '2026-11-05' });
-    expect(row('card-vib')).toMatchObject({ amount: 7246783, debtRemaining: 22933941, dueDate: '2026-11-10' });
+    expect(row('card-vib')).toMatchObject({ amount: 7246783, debtRemaining: 22933941, dueDate: '2026-11-09' });
     expect(row('card-vib').children.map((c) => [c.obligationId, c.label, c.amount])).toEqual([['vib-1', 'Kỳ 1/9', 1960895]]);
     expect(['sac-1', 'sac-2', 'sac-3'].map((id) => row(id).amount)).toEqual([1696000, 2072000, 3072000]);
     expect(row('sac-4')).toMatchObject({ amount: 0, state: 'not_yet', dueDate: '2026-12-19' });
@@ -92,13 +92,13 @@ describe('Phụ lục A — dự phóng tháng 12/2026', () => {
 
 describe('VIB: trả góp chuyển đổi 06/10 gộp vào sao kê (số liệu thật)', () => {
   // Hạn mức 28.800.000, còn 5.866.059. Trả góp 17.648.053 / 9 kỳ, kỳ 1 (1.960.895) lên sao kê 25/10.
-  // Kỳ 10/11 trả thẻ 7.246.783 = chi tiêu + kỳ 1/9.
+  // Kỳ 09/11 (sao kê 25/10 + 15 ngày) trả thẻ 7.246.783 = chi tiêu + kỳ 1/9.
   const sum = monthlySummary(s, '2026-11', today);
   const vib = sum.rows.find((r) => r.obligationId === 'card-vib')!;
 
   it('tháng 11 là kỳ 1/9, nằm trong số phải trả của thẻ, không cộng riêng', () => {
     expect(vib.amount).toBe(7246783);
-    expect(vib.children.map((c) => [c.label, c.amount, c.dueDate])).toEqual([['Kỳ 1/9', 1960895, '2026-11-10']]);
+    expect(vib.children.map((c) => [c.label, c.amount, c.dueDate])).toEqual([['Kỳ 1/9', 1960895, '2026-11-09']]);
   });
 
   it('dư nợ = dư nợ hiện tại + gốc kỳ 2–9 chưa lên sao kê; hạn mức còn 5.866.059', () => {

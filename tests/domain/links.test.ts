@@ -47,7 +47,7 @@ describe('trả góp tạo từ mẫu preset (thiếu thẻ)', () => {
     const twoCards: ProfileState = {
       ...fromTemplates,
       obligations: fromTemplates.obligations.map((o) =>
-        o.id === 'card-sac' && o.kind === 'credit_card' ? { ...o, dueRule: { type: 'statement_fixed_due', statementDay: 25, dueDay: 10 } } : o,
+        o.id === 'card-sac' && o.kind === 'credit_card' ? { ...o, dueRule: { type: 'statement_offset', statementDay: 25, daysAfterStatement: 15 } } : o,
       ),
     };
     const { state, attached } = repairLinks(twoCards);

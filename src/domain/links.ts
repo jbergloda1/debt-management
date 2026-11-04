@@ -20,11 +20,8 @@ export function hasBrokenLink(loan: InstallmentLoanObligation, s: Pick<ProfileSt
 export function guessParentCard(loan: InstallmentLoanObligation, s: Pick<ProfileState, 'obligations' | 'institutions'>): StatementBased | undefined {
   const cards = s.obligations.filter(isCard);
   const instName = (id: string) => s.institutions.find((i) => i.id === id)?.name.trim().toLowerCase();
-  const sameCycle = (c: StatementBased) => {
-    const a = loan.dueRule;
-    const b = c.dueRule;
-    return a.type === 'statement_fixed_due' && b.type === 'statement_fixed_due' && a.statementDay === b.statementDay && a.dueDay === b.dueDay;
-  };
+  const sameCycle = (c: StatementBased) =>
+    'statementDay' in loan.dueRule && JSON.stringify(loan.dueRule) === JSON.stringify(c.dueRule);
   const levels = [
     cards.filter((c) => c.institutionId === loan.institutionId),
     cards.filter((c) => instName(c.institutionId) === instName(loan.institutionId)),

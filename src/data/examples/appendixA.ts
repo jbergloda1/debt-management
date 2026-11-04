@@ -81,7 +81,7 @@ export const appendixA: ProfileState = {
       creditLineId: 'cl-vib',
       name: 'Thẻ VIB',
       statementDay: 25,
-      dueRule: { type: 'statement_fixed_due', statementDay: 25, dueDay: 10 },
+      dueRule: { type: 'statement_offset', statementDay: 25, daysAfterStatement: 15 },
       paymentPolicy: 'current_balance',
     },
     sacLoan('sac-1', 'Vay tiêu dùng 1', '2026-05-20', 8000000, 5, 0.012, 4),
@@ -95,11 +95,11 @@ export const appendixA: ProfileState = {
       institutionId: 'inst-vib',
       name: 'Trả góp VIB',
       principal: 17648053,
-      // Chuyển đổi 06/10 → kỳ 1/9 lên sao kê 25/10, trả cùng thẻ hạn 10/11 (chưa trả kỳ nào)
+      // Chuyển đổi 06/10 → kỳ 1/9 lên sao kê 25/10, trả cùng thẻ hạn 09/11 (sao kê + 15 ngày) (chưa trả kỳ nào)
       startDate: '2026-10-06',
       periods: 9,
       interestModel: { type: 'zero_interest' },
-      dueRule: { type: 'statement_fixed_due', statementDay: 25, dueDay: 10 },
+      dueRule: { type: 'statement_offset', statementDay: 25, daysAfterStatement: 15 },
       link: { parentObligationId: 'card-vib', creditLineId: 'cl-vib', sharesCreditLimit: true, billedIntoStatement: true },
     },
     {
@@ -158,7 +158,7 @@ export const appendixA: ProfileState = {
       id: 'st-vib-2610',
       obligationId: 'card-vib',
       statementDate: '2026-10-25',
-      dueDate: '2026-11-10',
+      dueDate: '2026-11-09',
       statementBalance: 7246783,
       currentBalance: 7246783,
       capturedAt: '2026-11-01',

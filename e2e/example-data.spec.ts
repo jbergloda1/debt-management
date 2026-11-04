@@ -11,7 +11,10 @@ test('tổng quan tháng 11/2026', async ({ page }) => {
 
   // Thẻ Sacombank đến hạn 05/11 → còn 1 ngày
   await expect(row(page, 'Thẻ Sacombank')).toContainText('Sắp đến hạn');
-  await expect(page.locator('.alert', { hasText: 'DUE_SOON' })).toContainText('Thẻ Sacombank');
+  await expect(page.locator('.alert', { hasText: 'DUE_SOON' })).toHaveCount(2);
+  await expect(page.locator('.alert', { hasText: 'DUE_SOON' }).first()).toContainText('Thẻ Sacombank');
+  // Thẻ VIB hạn 09/11 (sao kê 25/10 + 15 ngày) → còn 5 ngày
+  await expect(page.locator('.alert', { hasText: 'DUE_SOON' }).last()).toContainText('Thẻ VIB');
 
   // VIB: kỳ 1/9 của trả góp nằm trong sao kê, không cộng riêng
   const vib = row(page, 'Thẻ VIB');

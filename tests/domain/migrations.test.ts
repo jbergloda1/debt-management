@@ -44,3 +44,33 @@ describe('migration', () => {
     expect(state.profile.settings.groupByDate).toBe(false);
   });
 });
+
+describe('migration v4: hạn thẻ VIB = sao kê + 15 ngày', () => {
+  const OLD = { type: 'statement_fixed_due', statementDay: 25, dueDay: 10 };
+  const v3 = () => {
+    const s: any = structuredClone(appendixA);
+    s.schemaVersion = 3;
+    for (const o of s.obligations) if (o.id === 'card-vib' || o.id === 'vib-1') o.dueRule = { ...OLD };
+    s.statements.find((x: any) => x.id === 'st-vib-2610').dueDate = '2026-11-10';
+    return s;
+  };
+
+  it('đổi thẻ VIB, trả góp gắn vào thẻ và hạn sao kê đã lưu; số phải trả không đổi', () => {
+    const { state, from } = migrate(v3());
+    expect(from).toBe(3);
+    const rule = { type: 'statement_offset', statementDay: 25, daysAfterStatement: 15 };
+    expect((state.obligations.find((o) => o.id === 'card-vib') as any).dueRule).toEqual(rule);
+    expect((state.obligations.find((o) => o.id === 'vib-1') as any).dueRule).toEqual(rule);
+    expect(state.statements.find((x) => x.id === 'st-vib-2610')!.dueDate).toBe('2026-11-09');
+    expect(monthlySummary(state, '2026-11', today).totals.payable).toBe(28467963);
+  });
+
+  it('không đụng thẻ ngân hàng khác hoặc hạn đã tự sửa', () => {
+    const s = v3();
+    s.institutions.find((i: any) => i.id === 'inst-vib').name = 'Techcombank';
+    expect((migrate(s).state.obligations.find((o) => o.id === 'card-vib') as any).dueRule).toEqual(OLD);
+    const custom = v3();
+    custom.statements.find((x: any) => x.id === 'st-vib-2610').dueDate = '2026-11-08';
+    expect(migrate(custom).state.statements.find((x) => x.id === 'st-vib-2610')!.dueDate).toBe('2026-11-08');
+  });
+});

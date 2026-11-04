@@ -22,9 +22,9 @@ describe('lịch nhắc', () => {
     expect(queue.find((r) => r.obligationId === 'card-vib')!.body).toContain('7.246.783');
   });
 
-  it('hôm nay chỉ nhắc thẻ Sacombank (còn 1 ngày)', () => {
+  it('hôm nay nhắc thẻ Sacombank (còn 1 ngày) và thẻ VIB (hạn 09/11, mốc trước 5 ngày)', () => {
     const due = remindersDue(queue, today, []);
-    expect(due.map((r) => r.title)).toEqual(['Thẻ Sacombank đến hạn sau 1 ngày']);
+    expect(due.map((r) => r.title)).toEqual(['Thẻ Sacombank đến hạn sau 1 ngày', 'Thẻ VIB đến hạn sau 5 ngày']);
     expect(due[0].body.replace(/ /g, ' ')).toBe('Sao kê 10/10 · 8.366.746 ₫ · hạn 05/11/2026');
   });
 

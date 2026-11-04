@@ -20,7 +20,7 @@ describe('sang tháng mới', () => {
 
   it('liệt kê khoản tháng trước chưa trả (không gồm kỳ nằm trong sao kê)', () => {
     expect(plan.openItems.map((i) => i.obligationId)).toEqual(['card-sac', 'card-vib', 'shf-1', 'sac-1', 'sac-2', 'sac-3', 'sf-1']);
-    expect(defaultPayment(plan.openItems[1], today)).toEqual({ amount: 7246783, date: '2026-11-10' });
+    expect(defaultPayment(plan.openItems[1], today)).toEqual({ amount: 7246783, date: '2026-11-09' });
   });
 
   it('dự kiến ngày sao kê mới và các kỳ trả góp đã gộp', () => {

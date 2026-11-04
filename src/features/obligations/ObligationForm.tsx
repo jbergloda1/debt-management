@@ -346,7 +346,7 @@ export function ObligationForm({ initial, onClose }: { initial?: Obligation; onC
                 {ob.link.billedIntoStatement && (
                   <p className="field-hint wide">
                     Kỳ đầu lên sao kê đầu tiên sau ngày chuyển đổi và được trả cùng sao kê đó. Ví dụ chuyển đổi 06/10, sao kê ngày 25 → kỳ
-                    1 nằm trong sao kê 25/10, trả hạn 10/11. Dư nợ hiện tại của thẻ đã gồm kỳ đó; phần gốc các kỳ sau được app tính riêng
+                    1 nằm trong sao kê 25/10, trả cùng hạn thẻ (09/11). Dư nợ hiện tại của thẻ đã gồm kỳ đó; phần gốc các kỳ sau được app tính riêng
                     vào hạn mức.
                   </p>
                 )}

@@ -1,4 +1,4 @@
-import { addMonths, addMonthsYM, dayOf, endOfMonth, monthOf, setDay, startOfMonth } from './dates';
+import { addDays, addMonths, addMonthsYM, dayOf, endOfMonth, monthOf, setDay, startOfMonth } from './dates';
 import { CURRENT_SCHEMA_VERSION, DEFAULT_SETTINGS, newId } from './defaults';
 import type { V1AppState } from './legacy/v1';
 import { generateDueDates } from './rules';
@@ -20,7 +20,44 @@ const migrations: Record<number, (s: any) => any> = {
   2: (s) => repairLinks(s).state,
   // Thêm chi tiêu
   3: (s) => ({ ...s, expenses: s.expenses ?? [] }),
+  // Hạn trả thẻ VIB = ngày sao kê + 15 ngày (không cố định ngày 10)
+  4: (s) => fixVibDueRule(s),
 };
+
+const OLD_VIB_RULE: DueDateRule = { type: 'statement_fixed_due', statementDay: 25, dueDay: 10 };
+const VIB_RULE: DueDateRule = { type: 'statement_offset', statementDay: 25, daysAfterStatement: 15 };
+const sameRule = (a: DueDateRule | undefined, b: DueDateRule) => !!a && JSON.stringify(a) === JSON.stringify(b);
+
+/**
+ * Bản trước mặc định thẻ VIB "sao kê 25, đến hạn ngày 10" (theo mẫu preset / dữ liệu v1); theo thông báo dư nợ
+ * thật, VIB tính hạn = ngày sao kê + 15 ngày (25/09 → 10/10, 25/10 → 09/11). Chỉ đổi thẻ của tổ chức tên VIB
+ * còn giữ đúng quy tắc cũ, các trả góp gắn vào thẻ đó, và hạn của sao kê đã lưu nếu khớp quy tắc cũ.
+ */
+export function fixVibDueRule(s: ProfileState): ProfileState {
+  const vibInst = new Set(s.institutions.filter((i) => /\bvib\b/i.test(i.name)).map((i) => i.id));
+  const cards = new Set(
+    s.obligations.filter((o) => o.kind === 'credit_card' && vibInst.has(o.institutionId) && sameRule(o.dueRule, OLD_VIB_RULE)).map((o) => o.id),
+  );
+  if (!cards.size) return s;
+  const oldDue = (statementDate: string) => setDay(addMonthsYM(monthOf(statementDate), 1), 10);
+  return {
+    ...s,
+    institutions: s.institutions.map((i) =>
+      vibInst.has(i.id) && sameRule(i.defaults?.dueDateRule, OLD_VIB_RULE) ? { ...i, defaults: { ...i.defaults, dueDateRule: VIB_RULE } } : i,
+    ),
+    obligations: s.obligations.map((o) =>
+      cards.has(o.id) ||
+      (o.kind === 'installment_loan' && cards.has(o.link?.parentObligationId ?? '') && sameRule(o.dueRule, OLD_VIB_RULE))
+        ? { ...o, dueRule: VIB_RULE }
+        : o,
+    ),
+    statements: s.statements.map((st) =>
+      cards.has(st.obligationId) && dayOf(st.statementDate) === 25 && st.dueDate === oldDue(st.statementDate)
+        ? { ...st, dueDate: addDays(st.statementDate, 15) }
+        : st,
+    ),
+  };
+}
 
 export const isLegacyV1 = (raw: any): raw is V1AppState =>
   !!raw && typeof raw === 'object' && typeof raw.selectedMonth === 'string' && Array.isArray(raw.cards) && !raw.profile;
@@ -32,7 +69,7 @@ export interface MigrationResult {
 
 /** Chạy tuần tự các migration rồi kiểm tra schema (zod). Ném lỗi nếu dữ liệu không hợp lệ. */
 export function migrate(raw: unknown): MigrationResult {
-  if (isLegacyV1(raw)) return { state: validate(fromLegacyV1(raw)), from: 'legacy-v1' };
+  if (isLegacyV1(raw)) return { state: validate(fixVibDueRule(fromLegacyV1(raw))), from: 'legacy-v1' };
   const s = raw as any;
   const from = typeof s?.schemaVersion === 'number' ? s.schemaVersion : 0;
   if (from > CURRENT_SCHEMA_VERSION) throw new Error(`Dữ liệu từ phiên bản mới hơn (${from}) — hãy cập nhật app`);

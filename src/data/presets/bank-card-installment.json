@@ -7,22 +7,22 @@
     "name": "Ngân hàng (trả góp qua thẻ)",
     "type": "bank",
     "defaults": {
-      "dueDateRule": { "type": "statement_fixed_due", "statementDay": 25, "dueDay": 10 },
+      "dueDateRule": { "type": "statement_offset", "statementDay": 25, "daysAfterStatement": 15 },
       "interestModel": { "type": "zero_interest" }
     }
   },
   "obligationTemplates": [
     {
-      "label": "Thẻ tín dụng (sao kê 25, đến hạn 10 tháng sau)",
+      "label": "Thẻ tín dụng (sao kê 25, đến hạn sau 15 ngày)",
       "kind": "credit_card",
-      "defaults": { "statementDay": 25, "dueRule": { "type": "statement_fixed_due", "statementDay": 25, "dueDay": 10 } }
+      "defaults": { "statementDay": 25, "dueRule": { "type": "statement_offset", "statementDay": 25, "daysAfterStatement": 15 } }
     },
     {
       "label": "Trả góp chuyển đổi 0% (nằm trong sao kê thẻ)",
       "kind": "installment_loan",
       "defaults": {
         "interestModel": { "type": "zero_interest" },
-        "dueRule": { "type": "statement_fixed_due", "statementDay": 25, "dueDay": 10 },
+        "dueRule": { "type": "statement_offset", "statementDay": 25, "daysAfterStatement": 15 },
         "link": { "sharesCreditLimit": true, "billedIntoStatement": true }
       }
     }
