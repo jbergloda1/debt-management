@@ -10,6 +10,7 @@ import { useStore } from '../../state/store';
 import { PaymentModal } from '../payments/PaymentModal';
 import { BackupBanner } from '../backup/BackupBanner';
 import { RolloverEntry } from '../rollover/RolloverEntry';
+import { PaymentPlanPanel } from './PaymentPlanPanel';
 
 const VERDICT = {
   enough: { text: 'Đủ tiền trả nợ', tone: 'good' as const },
@@ -150,6 +151,8 @@ export function Dashboard() {
           tone={v.tone}
         />
       </section>
+
+      <PaymentPlanPanel />
 
       <section className="panel">
         <div className="panel-head">

@@ -6,6 +6,7 @@ const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ngày phải có dạng
 const yearMonth = z.string().regex(/^\d{4}-\d{2}$/, 'Tháng phải có dạng YYYY-MM');
 const money = z.number().int('Số tiền phải là số nguyên').nonnegative('Số tiền phải ≥ 0');
 const rate = z.number().nonnegative();
+const lateFeeSchema = z.object({ percent: rate, floor: money.optional() });
 const day = z.number().int().min(1).max(31);
 const id = z.string().min(1);
 
@@ -70,7 +71,7 @@ export const obligationSchema = z.discriminatedUnion('kind', [
     dueRule: dueDateRuleSchema,
     annualRate: rate.optional(),
     annualRateMax: rate.optional(),
-    lateFee: z.object({ percent: rate, floor: money.optional() }).optional(),
+    lateFee: lateFeeSchema.optional(),
     minimumPayment: z.object({ percentOfStatement: rate, floor: money.optional(), includeInstallmentsInFull: z.boolean() }).optional(),
     paymentPolicy: policy.optional(),
   }),
@@ -91,6 +92,7 @@ export const obligationSchema = z.discriminatedUnion('kind', [
         .optional(),
       opening: z.object({ asOf: isoDate, periodsPaid: z.number().int().nonnegative(), principalRemaining: money.optional() }).optional(),
       rounding: rounding.optional(),
+      lateFee: lateFeeSchema.optional(),
     })
     .refine((o) => o.netDisbursed === undefined || o.netDisbursed <= o.principal, {
       message: 'Tiền thực nhận không được lớn hơn số tiền vay',

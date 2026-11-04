@@ -439,3 +439,8 @@ button:focus-visible { outline:3px solid #0d948850; outline-offset:3px; }
 /* Mục tham khảo: chi phí nếu không trả đủ thẻ */
 .card-cost .payoff { margin: 10px 0 0; line-height: 1.5; }
 .card-cost .notes { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+
+/* Gợi ý trả khi thiếu tiền */
+.payment-plan .alert { margin: 8px 0; }
+.payment-plan .plan-foot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-top: 10px; }
+.payment-plan .plan-applied { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }

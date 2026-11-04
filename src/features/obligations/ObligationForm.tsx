@@ -14,6 +14,7 @@ import type {
   CreditLine,
   Institution,
   InstitutionType,
+  LateFeeRule,
   Obligation,
   ObligationKind,
   Statement,
@@ -41,6 +42,19 @@ const INST_TYPES: { value: InstitutionType; label: string }[] = [
 const PICK = '__pick';
 
 type PolicyChoice = 'inherit' | 'current_balance' | 'statement_balance' | 'minimum' | 'fixed';
+
+function LateFeeFields({ value, onChange, hint }: { value?: LateFeeRule; onChange: (v: LateFeeRule | undefined) => void; hint: string }) {
+  return (
+    <>
+      <Field label="Phí chậm thanh toán %" hint={hint}>
+        <PercentInput value={value?.percent} onChange={(percent) => onChange(percent === undefined && !value?.floor ? undefined : { ...value, percent: percent ?? 0 })} />
+      </Field>
+      <Field label="Phí chậm thanh toán ít nhất">
+        <MoneyInput value={value?.floor} onChange={(floor) => onChange(floor === undefined && !value?.percent ? undefined : { percent: 0, ...value, floor })} />
+      </Field>
+    </>
+  );
+}
 
 /** Thẻ lưu lãi theo năm; ngân hàng công bố theo tháng. */
 const perMonth = (annual?: number) => (annual === undefined ? undefined : annual / 12);
@@ -282,6 +296,7 @@ export function ObligationForm({ initial, onClose }: { initial?: Obligation; onC
             </Field>
             <Field label="Ngày giải ngân / mở khoản"><DateInput value={ob.startDate} onChange={(v) => v && set({ startDate: v })} /></Field>
             <Field label="Số kỳ"><IntInput min={1} value={ob.periods} onChange={(periods) => set({ periods })} /></Field>
+            <LateFeeFields value={ob.lateFee} onChange={(lateFee) => set({ lateFee })} hint="Tính trên số tiền kỳ chưa trả khi quá hạn" />
           </div>
           <InterestModelEditor value={ob.interestModel} onChange={(interestModel) => set({ interestModel })} />
           <DueRuleEditor value={ob.dueRule} onChange={(dueRule) => set({ dueRule })} />
@@ -457,15 +472,7 @@ export function ObligationForm({ initial, onClose }: { initial?: Obligation; onC
                     onChange={(floor) => set({ minimumPayment: { percentOfStatement: 0.05, includeInstallmentsInFull: true, ...ob.minimumPayment, floor } })}
                   />
                 </Field>
-                <Field label="Phí chậm thanh toán %" hint="Tính trên số tối thiểu chưa trả khi quá hạn">
-                  <PercentInput
-                    value={ob.lateFee?.percent}
-                    onChange={(percent) => set({ lateFee: percent === undefined ? undefined : { ...ob.lateFee, percent } })}
-                  />
-                </Field>
-                <Field label="Phí chậm thanh toán ít nhất">
-                  <MoneyInput value={ob.lateFee?.floor} onChange={(floor) => set({ lateFee: { percent: 0, ...ob.lateFee, floor } })} />
-                </Field>
+                <LateFeeFields value={ob.lateFee} onChange={(lateFee) => set({ lateFee })} hint="Tính trên số tối thiểu chưa trả khi quá hạn" />
               </>
             )}
             {ob.kind === 'revolving' && (

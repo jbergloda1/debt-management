@@ -174,6 +174,8 @@ export interface InstallmentLoanObligation extends ObligationBase {
   link?: ObligationLink;
   opening?: OpeningState;
   rounding?: RoundingPolicy;
+  /** Phí phạt khi trả thiếu/trễ một kỳ (% số tiền kỳ chưa trả, không thấp hơn floor) */
+  lateFee?: LateFeeRule;
 }
 
 export interface RevolvingObligation extends ObligationBase {

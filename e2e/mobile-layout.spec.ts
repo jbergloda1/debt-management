@@ -72,3 +72,13 @@ test('không tràn ngang: hộp thoại thêm khoản nợ, ghi nhận thanh to�
     if (await next.count()) await next.click();
   }
 });
+
+test('không tràn ngang: gợi ý trả khi thiếu tiền', async ({ page }) => {
+  await loadExample(page);
+  await page.goto('/#/cashflow');
+  const accounts = page.locator('section.panel', { has: page.getByRole('heading', { name: 'Tài khoản tiền' }) });
+  await accounts.locator('tbody tr').nth(2).locator('input.num').fill('0');
+  await page.goto('/#/dashboard');
+  await expect(page.getByRole('region', { name: 'Gợi ý trả khi thiếu tiền' })).toBeVisible();
+  await expectNoOverflow(page);
+});

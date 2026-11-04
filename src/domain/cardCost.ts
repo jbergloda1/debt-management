@@ -1,7 +1,7 @@
 import { minimumDue, type Engine } from './engine';
 import { monthOf } from './dates';
 import { roundMoney, sumBy } from './money';
-import type { CreditCardObligation, Money, Rate, Statement, YearMonth } from './types';
+import type { CreditCardObligation, LateFeeRule, Money, Rate, Statement, YearMonth } from './types';
 
 /** Khoảng giá trị (ngân hàng công bố lãi suất dạng khoảng → lãi cũng là khoảng). */
 export interface Range {
@@ -42,8 +42,8 @@ export function monthlyRates(card: CreditCardObligation): Range | undefined {
   return { min, max: Math.max(min, (card.annualRateMax ?? card.annualRate) / 12) };
 }
 
-export function lateFee(card: CreditCardObligation, unpaidMinimum: Money): Money | undefined {
-  const r = card.lateFee;
+export function lateFee(ob: { lateFee?: LateFeeRule }, unpaidMinimum: Money): Money | undefined {
+  const r = ob.lateFee;
   if (!r) return undefined;
   return Math.max(r.floor ?? 0, roundMoney(unpaidMinimum * r.percent));
 }
