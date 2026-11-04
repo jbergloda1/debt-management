@@ -1,0 +1,38 @@
+{
+  "key": "example-finance-company-cash-loan",
+  "displayName": "Công ty tài chính — vay tiền mặt trả góp",
+  "country": "VN",
+  "version": 1,
+  "institution": {
+    "name": "Công ty tài chính",
+    "type": "finance_company",
+    "defaults": {
+      "dueDateRule": { "type": "same_day_as_start", "offsetMonths": 1 },
+      "perPeriodFee": [
+        { "id": "collection", "name": "Phí thu hộ", "timing": "per_period", "amount": { "type": "fixed", "value": 12000 } }
+      ],
+      "upfrontFees": [
+        { "id": "insurance", "name": "Bảo hiểm khoản vay", "timing": "upfront_deducted", "amount": { "type": "percent_of_principal", "rate": 0.0575 } }
+      ]
+    }
+  },
+  "obligationTemplates": [
+    {
+      "label": "Vay tiền mặt — biết số tiền mỗi kỳ",
+      "kind": "installment_loan",
+      "defaults": {
+        "interestModel": { "type": "fixed_installment", "installment": 0 },
+        "dueRule": { "type": "same_day_as_start", "offsetMonths": 1 }
+      }
+    },
+    {
+      "label": "Vay tiền mặt — biết lãi suất năm (dư nợ giảm dần)",
+      "kind": "installment_loan",
+      "defaults": {
+        "interestModel": { "type": "reducing_balance", "annualRate": 0.35 },
+        "dueRule": { "type": "same_day_as_start", "offsetMonths": 1 }
+      }
+    }
+  ],
+  "source": "Ví dụ minh hoạ — phí thu hộ và bảo hiểm khác nhau tuỳ hợp đồng"
+}

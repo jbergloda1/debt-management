@@ -1,0 +1,30 @@
+{
+  "key": "example-bnpl",
+  "displayName": "Ví trả sau / mua trước trả sau (BNPL)",
+  "country": "VN",
+  "version": 1,
+  "institution": {
+    "name": "Ví trả sau",
+    "type": "bnpl",
+    "defaults": {
+      "dueDateRule": { "type": "fixed_day", "day": 10, "cutoffDay": 31, "offsetIfOnOrBeforeCutoff": 1, "offsetIfAfterCutoff": 1 },
+      "interestModel": { "type": "zero_interest" }
+    }
+  },
+  "obligationTemplates": [
+    {
+      "label": "Mua trả góp 0% (trả ngày 10 hàng tháng)",
+      "kind": "installment_loan",
+      "defaults": {
+        "interestModel": { "type": "zero_interest" },
+        "dueRule": { "type": "fixed_day", "day": 10, "cutoffDay": 31, "offsetIfOnOrBeforeCutoff": 1, "offsetIfAfterCutoff": 1 }
+      }
+    },
+    {
+      "label": "Trả sau 30 ngày",
+      "kind": "custom",
+      "defaults": {}
+    }
+  ],
+  "source": "Ví dụ minh hoạ"
+}

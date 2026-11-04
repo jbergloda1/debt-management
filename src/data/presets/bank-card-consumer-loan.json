@@ -1,0 +1,31 @@
+{
+  "key": "example-bank-card-consumer-loan",
+  "displayName": "Ngân hàng — thẻ + vay tiêu dùng trên hạn mức thẻ",
+  "country": "VN",
+  "version": 1,
+  "institution": {
+    "name": "Ngân hàng (thẻ + vay trên hạn mức)",
+    "type": "bank",
+    "defaults": {
+      "dueDateRule": { "type": "fixed_day", "day": 19, "cutoffDay": 19, "offsetIfOnOrBeforeCutoff": 1, "offsetIfAfterCutoff": 2 },
+      "interestModel": { "type": "flat_monthly", "monthlyRate": 0.012 }
+    }
+  },
+  "obligationTemplates": [
+    {
+      "label": "Thẻ tín dụng (sao kê 10, đến hạn 5 tháng sau)",
+      "kind": "credit_card",
+      "defaults": { "statementDay": 10, "dueRule": { "type": "statement_fixed_due", "statementDay": 10, "dueDay": 5 }, "annualRate": 0.3 }
+    },
+    {
+      "label": "Vay tiêu dùng trên hạn mức thẻ (trả riêng ngày 19)",
+      "kind": "installment_loan",
+      "defaults": {
+        "interestModel": { "type": "flat_monthly", "monthlyRate": 0.012 },
+        "dueRule": { "type": "fixed_day", "day": 19, "cutoffDay": 19, "offsetIfOnOrBeforeCutoff": 1, "offsetIfAfterCutoff": 2 },
+        "link": { "sharesCreditLimit": true, "billedIntoStatement": false }
+      }
+    }
+  ],
+  "source": "Ví dụ minh hoạ — hãy kiểm tra với hợp đồng của bạn"
+}
