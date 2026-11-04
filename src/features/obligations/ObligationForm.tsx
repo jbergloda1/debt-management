@@ -479,7 +479,7 @@ export function ObligationForm({ initial, onClose }: { initial?: Obligation; onC
       {ob.kind === 'custom' && (
         <>
           <h3>Lịch trả</h3>
-          <table>
+          <table className="cards-mobile">
             <tbody>
               {ob.schedule.map((e, i) => (
                 <tr key={i}>

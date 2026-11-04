@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StatusBadge, STATE_LABEL } from '../../components/ui';
-import { incomeOccurrences } from '../../domain/cashflow';
+import { expenseOccurrences, incomeOccurrences } from '../../domain/cashflow';
 import { dayOfWeek, daysInMonth, formatYM, parseYM, toISO } from '../../domain/dates';
 import type { DueItem } from '../../domain/types';
 import { useEngine, useFmt, useProfile, useSummary } from '../../state/hooks';
@@ -20,6 +20,7 @@ export function Calendar() {
   const days = daysInMonth(y, m);
   const lead = (dayOfWeek(toISO(y, m, 1)) + 6) % 7; // thứ Hai đầu tuần
   const incomes = incomeOccurrences(state.incomes, state.viewMonth);
+  const expenses = expenseOccurrences(state.expenses, state.viewMonth);
   const cells: (string | null)[] = [...Array(lead).fill(null), ...Array.from({ length: days }, (_, i) => toISO(y, m, i + 1))];
   while (cells.length % 7) cells.push(null);
   const nameOf = (id: string) => engine.obligation(id)?.name ?? id;
@@ -36,6 +37,9 @@ export function Calendar() {
         <span className="legend-item">
           <span className="dot income" /> Thu nhập
         </span>
+        <span className="legend-item">
+          <span className="dot expense" /> Chi tiêu
+        </span>
       </div>
       <div className="cal">
         {WEEKDAYS.map((w) => (
@@ -50,6 +54,9 @@ export function Calendar() {
               <div className="cal-day">{Number(d.slice(8))}</div>
               {inc.map((x) => (
                 <div key={x.incomeId} className="cal-item income">+ {x.name} {fmt.money(x.amount)}</div>
+              ))}
+              {expenses.filter((x) => x.date === d).map((x) => (
+                <div key={x.expenseId} className="cal-item expense">− {x.name} {fmt.money(x.amount)}</div>
               ))}
               {items.map((it) => (
                 <button
@@ -66,7 +73,7 @@ export function Calendar() {
         })}
       </div>
       <h3>Danh sách</h3>
-      <table>
+      <table className="cards-mobile">
         <tbody>
           {summary.items
             .filter((i) => !i.includedIn)

@@ -82,7 +82,7 @@ export function ObligationList() {
         <Empty>Không có khoản nào khớp bộ lọc.</Empty>
       ) : (
         <div className="scroll">
-          <table>
+          <table className="cards-mobile">
             <thead>
               <tr>
                 <th>Tên</th>

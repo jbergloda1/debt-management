@@ -223,6 +223,26 @@ export interface IncomeEntry {
   recurrence: IncomeRecurrence;
 }
 
+export type ExpenseCategory =
+  | 'housing'
+  | 'food'
+  | 'transport'
+  | 'utilities'
+  | 'family'
+  | 'health'
+  | 'education'
+  | 'entertainment'
+  | 'other';
+
+/** Chi tiêu sinh hoạt trả bằng tiền mặt/tài khoản (chi tiêu bằng thẻ tính ở dư nợ thẻ). */
+export interface ExpenseEntry {
+  id: ID;
+  name: string;
+  category: ExpenseCategory;
+  amount: Money;
+  recurrence: IncomeRecurrence;
+}
+
 export interface Scenario {
   id: ID;
   name: string;
@@ -248,6 +268,7 @@ export interface ProfileState {
   plannedAmounts: Record<string, Money>;
   cashAccounts: CashAccount[];
   incomes: IncomeEntry[];
+  expenses: ExpenseEntry[];
   scenarios: Scenario[];
   viewMonth: YearMonth;
 }

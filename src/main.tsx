@@ -5,8 +5,10 @@ import { ConfigProvider } from 'antd';
 import viVN from 'antd/locale/vi_VN';
 import './styles.css';
 import { registerPwa } from './pwa/pwa';
+import { watchResponsiveTables } from './components/responsiveTables';
 
 registerPwa();
+watchResponsiveTables();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

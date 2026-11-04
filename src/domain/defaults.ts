@@ -1,6 +1,6 @@
 import type { ID, ProfileSettings, ProfileState, YearMonth } from './types';
 
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 
 export const DEFAULT_SETTINGS: ProfileSettings = {
   defaultCardPaymentPolicy: 'current_balance',
@@ -47,6 +47,7 @@ export function newProfileState(opts: {
     plannedAmounts: {},
     cashAccounts: [],
     incomes: [],
+    expenses: [],
     scenarios: [
       { id: newId('scn'), name: 'Cơ bản', horizonMonths: 12, assumeAllPaidOnTime: true, cardMonthlySpending: {} },
     ],

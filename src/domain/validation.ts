@@ -179,6 +179,18 @@ export const profileStateSchema = z.object({
       ]),
     }),
   ),
+  expenses: z.array(
+    z.object({
+      id,
+      name: z.string(),
+      category: z.enum(['housing', 'food', 'transport', 'utilities', 'family', 'health', 'education', 'entertainment', 'other']),
+      amount: money,
+      recurrence: z.discriminatedUnion('type', [
+        z.object({ type: z.literal('once'), date: isoDate }),
+        z.object({ type: z.literal('monthly'), day, from: yearMonth.optional(), to: yearMonth.optional() }),
+      ]),
+    }),
+  ),
   scenarios: z.array(
     z.object({
       id,

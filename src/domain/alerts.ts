@@ -152,7 +152,7 @@ export function alerts(engine: Engine, month: YearMonth, summary: MonthlySummary
 
   const cash = summary.cash;
   if (cash.verdict === 'short') {
-    out.push({ code: 'CASH_SHORT', level: 'error', message: `Tiền hiện có thiếu ${fmt(cash.shortBy ?? 0)} để trả hết tháng này` });
+    out.push({ code: 'CASH_SHORT', level: 'error', message: `Tiền hiện có thiếu ${fmt(cash.shortBy ?? 0)} để trả nợ và chi tiêu tháng này` });
   } else if (cash.verdict === 'short_temporarily') {
     out.push({
       code: 'CASH_SHORT',

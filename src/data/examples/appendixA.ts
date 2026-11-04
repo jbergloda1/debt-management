@@ -174,6 +174,7 @@ export const appendixA: ProfileState = {
   incomes: [
     { id: 'inc-salary', name: 'Lương', amount: 14500000, recurrence: { type: 'monthly', day: 10, from: '2026-11' } },
   ],
+  expenses: [],
   scenarios: [
     {
       id: 'scn-base',

@@ -1,5 +1,5 @@
 import { endOfMonth, monthOf, monthRange, startOfMonth } from './dates';
-import { incomeOccurrences } from './cashflow';
+import { expenseOccurrences, incomeOccurrences } from './cashflow';
 import type { Engine } from './engine';
 import { sumBy } from './money';
 import type { ID, ISODate, Money, Scenario, YearMonth } from './types';
@@ -18,6 +18,8 @@ export interface ProjectionMonth {
   extra: Money;
   outflow: Money;
   income: Money;
+  /** Chi tiêu sinh hoạt của tháng (mục Chi tiêu) */
+  expenses: Money;
   carryIn: Money;
   leftover: Money;
   /** Dư nợ còn lại cuối tháng */
@@ -98,7 +100,8 @@ export function project(engine: Engine, scenario: Scenario, fromMonth: YearMonth
     const outflow = installments + cardsAmt + extra;
     const income = scenario.incomeOverrides?.[m] ?? sumBy(incomeOccurrences(engine.state.incomes, m), (i) => i.amount);
     const carryIn = scenario.carryLeftover ? carry : 0;
-    const leftover = income + carryIn - outflow;
+    const expenses = sumBy(expenseOccurrences(engine.state.expenses, m), (e) => e.amount);
+    const leftover = income + carryIn - outflow - expenses;
     carry = leftover;
 
     // Dư nợ cuối tháng: phần khoản vay chưa đến hạn + chi tiêu thẻ của tháng (trả tháng sau)
@@ -117,7 +120,7 @@ export function project(engine: Engine, scenario: Scenario, fromMonth: YearMonth
       })
       .map((l) => ({ obligationId: l.id, name: l.name }));
 
-    out.push({ month: m, installments, cards: cardsAmt, extra, outflow, income, carryIn, leftover, debtEnd, payoffs, lines });
+    out.push({ month: m, installments, cards: cardsAmt, extra, outflow, income, expenses, carryIn, leftover, debtEnd, payoffs, lines });
   });
 
   const lastDates = [...unpaidRows.values()].map((rows) => rows[rows.length - 1]?.dueDate).filter((d): d is string => !!d);

@@ -144,7 +144,7 @@ export function Dashboard() {
             ) : cash.verdict === 'short_temporarily' ? (
               `Thiếu ${fmt.money(cash.shortBy)} ngày ${fmt.short(cash.shortDate)}`
             ) : (
-              `Có ${fmt.money(cash.available)} · còn lại sau khi trả`
+              `Có ${fmt.money(cash.available)}${cash.expensesExpected ? ` · chi tiêu ${fmt.money(cash.expensesExpected)}` : ''} · còn lại sau khi trả`
             )
           }
           tone={v.tone}
@@ -171,7 +171,7 @@ export function Dashboard() {
           </Empty>
         ) : (
           <div className="scroll">
-            <table>
+            <table className="cards-mobile due-table">
               <thead>
                 <tr>
                   <th>Khoản</th>
@@ -207,7 +207,7 @@ export function Dashboard() {
         </section>
         <section className="panel">
           <h2>Theo tổ chức</h2>
-          <table>
+          <table className="cards-mobile">
             <thead>
               <tr><th>Tổ chức</th><th className="r">Phải trả tháng này</th><th className="r">Dư nợ</th></tr>
             </thead>

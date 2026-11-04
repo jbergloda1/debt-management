@@ -37,7 +37,7 @@ export function StatementsPanel({ ob }: { ob: StatementBased }) {
       {list.length === 0 ? (
         <p className="muted">Chưa có sao kê — nhập sao kê để app biết số phải trả kỳ này.</p>
       ) : (
-        <table>
+        <table className="cards-mobile">
           <thead>
             <tr>
               <th>Ngày sao kê</th>

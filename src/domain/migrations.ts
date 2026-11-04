@@ -18,6 +18,8 @@ const migrations: Record<number, (s: any) => any> = {
   }),
   // Gắn lại thẻ cho trả góp tạo từ mẫu preset (thiếu thẻ → không trừ hạn mức); tên hạn mức theo tên thẻ
   2: (s) => repairLinks(s).state,
+  // Thêm chi tiêu
+  3: (s) => ({ ...s, expenses: s.expenses ?? [] }),
 };
 
 export const isLegacyV1 = (raw: any): raw is V1AppState =>
@@ -229,6 +231,7 @@ export function fromLegacyV1(v1: V1AppState): ProfileState {
     plannedAmounts,
     cashAccounts: v1.cash.map((c) => ({ id: newId('acc'), name: c.label, balance: c.amount, updatedAt: asOf })),
     incomes: [],
+    expenses: [],
     scenarios: [
       {
         id: newId('scn'),

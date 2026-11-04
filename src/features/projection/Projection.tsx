@@ -117,6 +117,13 @@ export function Projection() {
           <div className="tile-label">Tổng phải trả {scn.horizonMonths} tháng</div>
           <div className="tile-value">{fmt.money(sumBy(result.months, (m) => m.outflow))}</div>
         </div>
+        {result.months.some((m) => m.expenses > 0) && (
+          <div className="tile">
+            <div className="tile-label">Chi tiêu {scn.horizonMonths} tháng</div>
+            <div className="tile-value">{fmt.money(sumBy(result.months, (m) => m.expenses))}</div>
+            <div className="tile-sub">Đã trừ vào tiền còn lại mỗi tháng</div>
+          </div>
+        )}
         <div className="tile">
           <div className="tile-label">Dư nợ cuối kỳ dự phóng</div>
           <div className="tile-value">{fmt.money(result.months.at(-1)?.debtEnd ?? 0)}</div>
@@ -146,7 +153,7 @@ export function Projection() {
         <h2>Bảng dự phóng</h2>
         <p className="muted small-text">Sửa ô "Thu nhập" để ghi đè thu nhập của tháng đó; để trống = theo thu nhập định kỳ.</p>
         <div className="scroll">
-          <table>
+          <table className="cards-mobile">
             <thead>
               <tr>
                 <th>Tháng</th>
@@ -155,6 +162,7 @@ export function Projection() {
                 <th className="r">Trả thêm</th>
                 <th className="r">Tổng phải trả</th>
                 <th className="r">Thu nhập</th>
+                <th className="r">Chi tiêu</th>
                 {scn.carryLeftover && <th className="r">Chuyển sang</th>}
                 <th className="r">Còn lại</th>
                 <th className="r">Dư nợ cuối tháng</th>
@@ -181,6 +189,7 @@ export function Projection() {
                       }}
                     />
                   </td>
+                  <td className="r">{m.expenses ? fmt.money(m.expenses) : ''}</td>
                   {scn.carryLeftover && <td className="r">{fmt.money(m.carryIn)}</td>}
                   <td className={`r ${m.leftover < 0 ? 'bad-text' : ''}`}>{fmt.money(m.leftover)}</td>
                   <td className="r">{fmt.money(m.debtEnd)}</td>
@@ -197,7 +206,7 @@ export function Projection() {
         <p className="muted small-text">
           Khoản trả thêm được tính vào số phải trả của tháng và trừ vào dư nợ; app chưa tự tính lại lịch trả sau khi trả trước.
         </p>
-        <table>
+        <table className="cards-mobile">
           <tbody>
             {(scn.extraPayments ?? []).map((e, i) => (
               <tr key={i}>

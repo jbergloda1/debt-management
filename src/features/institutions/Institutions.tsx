@@ -51,7 +51,7 @@ export function Institutions() {
             <button className="primary" onClick={() => setEditing({ id: newId('inst'), name: '', type: 'bank' })}>+ Tổ chức mới</button>
           </div>
         </div>
-        <table>
+        <table className="cards-mobile">
           <thead>
             <tr><th>Tên</th><th>Loại</th><th>Mặc định</th><th></th></tr>
           </thead>

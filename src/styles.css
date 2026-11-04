@@ -367,3 +367,71 @@ button:focus-visible { outline:3px solid #0d948850; outline-offset:3px; }
 .pay-fields { display: flex; gap: 8px; flex: 1 1 300px; }
 .pay-fields .field { flex: 1; min-width: 0; }
 .pay-fields input { width: 100%; }
+
+/* ---------- điện thoại: bảng dạng thẻ, lịch, số liệu (≤600px) ---------- */
+.cal { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.cal-cell, .cal-item { min-width: 0; }
+@media (max-width: 600px) {
+  table.cards-mobile, table.cards-mobile > tbody, table.cards-mobile > tfoot { display: block; width: 100%; }
+  table.cards-mobile > thead { display: none; }
+  table.cards-mobile tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 12px; padding: 12px 2px; border-bottom: 1px solid var(--border); }
+  table.cards-mobile td { display: block; border: 0; padding: 0; text-align: left; min-width: 0; overflow-wrap: anywhere; }
+  table.cards-mobile td:first-child { grid-column: 1 / -1; }
+  table.cards-mobile td:empty { display: none; }
+  table.cards-mobile td[data-label]::before { content: attr(data-label); display: block; font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  table.cards-mobile td:first-child::before { display: none; }
+  table.cards-mobile td.indent { padding-left: 0; }
+  table.cards-mobile input, table.cards-mobile select, table.cards-mobile input.num { width: 100%; max-width: 100%; }
+  table.cards-mobile .suffix { display: flex; }
+  table.cards-mobile button.small { width: 100%; padding: 8px 10px; }
+  table.cards-mobile tfoot tr { border-bottom: 0; }
+  /* Ô chứa nhiều nút: xuống dòng, chiếm cả hàng */
+  table.cards-mobile td.nowrap { white-space: normal; display: flex; flex-wrap: wrap; gap: 6px; grid-column: 1 / -1; }
+  table.cards-mobile td.nowrap > button { flex: 1 1 auto; width: auto; }
+  table.cards-mobile td.wide { grid-column: 1 / -1; }
+  .scroll:has(> table.cards-mobile) { overflow-x: visible; }
+
+  /* Tổng quan: nút "Ghi nhận" và trạng thái nằm cùng hàng cuối */
+  .due-table tr.sub td, .due-table tr.child td { background: transparent; }
+  .due-table tr.sub, .due-table tr.child { background: var(--bg); border-radius: 8px; padding: 10px; margin: 4px 0; border-bottom: 0; }
+
+  /* Số tiền không bẻ dòng; chữ nhỏ lại theo bề ngang màn hình */
+  .tile-value { white-space: nowrap; font-size: clamp(16px, 5vw, 24px) !important; }
+  .tiles > .tile:first-child .tile-value { font-size: clamp(22px, 8vw, 30px) !important; }
+  .tile-label, .tile-sub { overflow-wrap: anywhere; }
+
+  /* Lịch: ô quá hẹp để hiện chữ → vạch màu theo trạng thái, chi tiết xem danh sách bên dưới */
+  .cal-cell { min-height: 54px; padding: 3px; gap: 2px; }
+  .cal-item { font-size: 0 !important; height: 6px; padding: 0; border-left-width: 0; border-radius: 3px; }
+  .cal-item.overdue { background: var(--critical); }
+  .cal-item.due_soon { background: var(--warning); }
+  .cal-item.upcoming, .cal-item.not_yet { background: var(--accent); opacity: 0.6; }
+  .cal-item.partial { background: var(--accent); }
+  .cal-item.paid, .cal-item.income { background: var(--good); }
+
+  /* Hàng nút, chú giải, thanh công cụ tự xuống dòng */
+  .toolbar, .legend, .panel-head { flex-wrap: wrap; }
+  .toolbar > button, .toolbar > select { max-width: 100%; }
+  .big-numbers { gap: 12px 24px; }
+  .fee-row > * { flex: 1 1 140px; min-width: 0; }
+  .kv { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .kv dd { margin-bottom: 8px; overflow-wrap: anywhere; }
+}
+
+/* ---------- chi tiêu ---------- */
+.recurrence { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.category-breakdown { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.category-chip { background: var(--gray-bg); border-radius: 999px; padding: 4px 10px; font-size: 12px; }
+.kind-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: middle; background: var(--muted); }
+.kind-dot.income { background: var(--good); }
+.kind-dot.expense { background: var(--warning); }
+.kind-dot.debt { background: var(--critical); }
+.cal-item.expense { border-left-color: var(--warning); background: var(--warning-bg); }
+.dot.expense { background: var(--warning); }
+@media (max-width: 600px) {
+  .cal-item.expense { background: var(--warning); }
+  .recurrence { display: flex; }
+  .recurrence select { flex: 1; }
+}
+
+.recurrence .inline { white-space: nowrap; }

@@ -66,7 +66,7 @@ export function ObligationDetail({ id }: { id: string }) {
       {items.length > 0 && (
         <section className="panel">
           <h2>Tháng đang xem</h2>
-          <table>
+          <table className="cards-mobile">
             <tbody>
               {items.map((it) => (
                 <tr key={it.key}>
@@ -93,7 +93,7 @@ export function ObligationDetail({ id }: { id: string }) {
       {ob.kind === 'custom' && (
         <section className="panel">
           <h2>Lịch trả</h2>
-          <table>
+          <table className="cards-mobile">
             <tbody>
               {ob.schedule.map((e, i) => {
                 const key = loanItemKey(ob.id, i + 1);
@@ -117,7 +117,7 @@ export function ObligationDetail({ id }: { id: string }) {
         {payments.length === 0 ? (
           <p className="muted">Chưa ghi nhận thanh toán nào.</p>
         ) : (
-          <table>
+          <table className="cards-mobile">
             <thead>
               <tr><th>Ngày</th><th>Cho kỳ</th><th className="r">Số tiền</th><th>Hình thức</th><th>Ghi chú</th><th></th></tr>
             </thead>
