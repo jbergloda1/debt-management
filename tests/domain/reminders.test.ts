@@ -14,18 +14,18 @@ describe('lịch nhắc', () => {
   it('mốc nhắc theo reminderDaysBefore + đúng ngày; bỏ khoản nằm trong sao kê', () => {
     const sac = queue.filter((r) => r.obligationId === 'card-sac').map((r) => [r.date, r.daysBefore]);
     expect(sac).toEqual([
-      ['2026-11-04', 1],
-      ['2026-11-05', 0],
-    ]); // mốc trước 5 ngày (31/10) đã quá STALE_DAYS
+      ['2026-11-03', 1],
+      ['2026-11-04', 0],
+    ]); // mốc trước 5 ngày (30/10) đã quá STALE_DAYS
     expect(queue.filter((r) => r.obligationId === 'shf-1').map((r) => r.date)).toEqual(['2026-11-10', '2026-11-14', '2026-11-15']);
     expect(queue.some((r) => r.obligationId === 'vib-1')).toBe(false);
     expect(queue.find((r) => r.obligationId === 'card-vib')!.body).toContain('7.246.783');
   });
 
-  it('hôm nay nhắc thẻ Sacombank (còn 1 ngày) và thẻ VIB (hạn 09/11, mốc trước 5 ngày)', () => {
+  it('hôm nay nhắc thẻ Sacombank (hạn hôm nay) và thẻ VIB (hạn 09/11, mốc trước 5 ngày)', () => {
     const due = remindersDue(queue, today, []);
-    expect(due.map((r) => r.title)).toEqual(['Thẻ Sacombank đến hạn sau 1 ngày', 'Thẻ VIB đến hạn sau 5 ngày']);
-    expect(due[0].body.replace(/ /g, ' ')).toBe('Sao kê 10/10 · 8.366.746 ₫ · hạn 05/11/2026');
+    expect(due.map((r) => r.title)).toEqual(['Thẻ Sacombank đến hạn hôm nay', 'Thẻ VIB đến hạn sau 5 ngày']);
+    expect(due[0].body.replace(/ /g, ' ')).toBe('Sao kê 10/10 · 8.366.746 ₫ · hạn 04/11/2026');
   });
 
   it('không nhắc lại; mở app muộn chỉ hiện mốc gần nhất', () => {
@@ -46,7 +46,7 @@ describe('lịch nhắc', () => {
     expect(reminderSchedule(createEngine(paid, today), today, '2026-11-30').some((r) => r.obligationId === 'card-sac')).toBe(false);
 
     const late = reminderSchedule(createEngine(appendixA, '2026-11-07'), '2026-11-07', '2026-11-30').filter((r) => r.obligationId === 'card-sac');
-    expect(late.map((r) => [r.key, r.date, r.title])).toEqual([['card-sac:st-sac-2610@overdue', '2026-11-07', 'Thẻ Sacombank đã quá hạn 2 ngày']]);
+    expect(late.map((r) => [r.key, r.date, r.title])).toEqual([['card-sac:st-sac-2610@overdue', '2026-11-07', 'Thẻ Sacombank đã quá hạn 3 ngày']]);
   });
 });
 
@@ -59,7 +59,7 @@ describe('file lịch .ics', () => {
     // tháng 11: thẻ Sac, thẻ VIB, Shinhan 1, Vay 1–3, SFinance; tháng 12: Vay 3–4, VIB? (chưa có sao kê), Shinhan 1–2, SFinance
     expect(events.length).toBe(7 + 5);
     const sac = events.find((e) => e.includes('UID:card-sac:st-sac-2610@debt-manager'))!;
-    expect(sac).toContain('DTSTART;VALUE=DATE:20261105');
+    expect(sac).toContain('DTSTART;VALUE=DATE:20261104');
     expect(sac).toContain('TRIGGER;RELATED=START:-PT111H'); // 5 ngày trước, 9:00
     expect(sac).toContain('TRIGGER;RELATED=START:-PT15H'); // 1 ngày trước, 9:00
     expect(sac).toContain('TRIGGER;RELATED=START:PT9H'); // đúng ngày, 9:00

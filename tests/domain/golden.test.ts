@@ -20,7 +20,7 @@ describe('Phụ lục A — tháng 11/2026', () => {
   });
 
   it('từng dòng', () => {
-    expect(row('card-sac')).toMatchObject({ amount: 8366746, debtRemaining: 8366746, state: 'due_soon', dueDate: '2026-11-05' });
+    expect(row('card-sac')).toMatchObject({ amount: 8366746, debtRemaining: 8366746, state: 'due_soon', dueDate: '2026-11-04' });
     expect(row('card-vib')).toMatchObject({ amount: 7246783, debtRemaining: 22933941, dueDate: '2026-11-09' });
     expect(row('card-vib').children.map((c) => [c.obligationId, c.label, c.amount])).toEqual([['vib-1', 'Kỳ 1/9', 1960895]]);
     expect(['sac-1', 'sac-2', 'sac-3'].map((id) => row(id).amount)).toEqual([1696000, 2072000, 3072000]);

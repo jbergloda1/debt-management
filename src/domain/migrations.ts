@@ -22,6 +22,8 @@ const migrations: Record<number, (s: any) => any> = {
   3: (s) => ({ ...s, expenses: s.expenses ?? [] }),
   // Hạn trả thẻ VIB = ngày sao kê + 15 ngày (không cố định ngày 10)
   4: (s) => fixVibDueRule(s),
+  // Theo sao kê thật: thẻ Sacombank hạn = sao kê + 25 ngày, tối thiểu 3%; phí chuyển đổi trả góp VIB cộng vào gốc
+  5: (s) => fixFromStatements(s),
 };
 
 const OLD_VIB_RULE: DueDateRule = { type: 'statement_fixed_due', statementDay: 25, dueDay: 10 };
@@ -59,6 +61,42 @@ export function fixVibDueRule(s: ProfileState): ProfileState {
   };
 }
 
+const OLD_SAC_RULE: DueDateRule = { type: 'statement_fixed_due', statementDay: 10, dueDay: 5 };
+const SAC_RULE: DueDateRule = { type: 'statement_offset', statementDay: 10, daysAfterStatement: 25 };
+
+/**
+ * Đối chiếu sao kê thật (kỳ 10/2026):
+ * - Sacombank: "Thanh toán trước ngày 04-11-2026" cho sao kê 10/10 → hạn = sao kê + 25 ngày (không cố định ngày 5);
+ *   tối thiểu 236.736 = 3% × 7.891.193 (không phải 5%).
+ * - VIB: chuyển trả góp 9 tháng 17.648.053 = dư nợ 15.885.013 + phí chuyển đổi 1.763.040 → tiền thực nhận 15.885.013.
+ */
+export function fixFromStatements(s: ProfileState): ProfileState {
+  const instIds = (re: RegExp) => new Set(s.institutions.filter((i) => re.test(i.name)).map((i) => i.id));
+  const sacInst = instIds(/sacombank/i);
+  const vibInst = instIds(/\bvib\b/i);
+  const sacCards = new Set(
+    s.obligations.filter((o) => o.kind === 'credit_card' && sacInst.has(o.institutionId) && sameRule(o.dueRule, OLD_SAC_RULE)).map((o) => o.id),
+  );
+  const oldDue = (statementDate: string) => setDay(addMonthsYM(monthOf(statementDate), 1), 5);
+  return {
+    ...s,
+    obligations: s.obligations.map((o) => {
+      if (o.kind === 'credit_card' && sacCards.has(o.id)) {
+        return { ...o, dueRule: SAC_RULE, minimumPayment: o.minimumPayment ?? { percentOfStatement: 0.03, includeInstallmentsInFull: false } };
+      }
+      if (o.kind === 'installment_loan' && vibInst.has(o.institutionId) && o.principal === 17648053 && o.netDisbursed === undefined) {
+        return { ...o, netDisbursed: 15885013 };
+      }
+      return o;
+    }),
+    statements: s.statements.map((st) =>
+      sacCards.has(st.obligationId) && dayOf(st.statementDate) === 10 && st.dueDate === oldDue(st.statementDate)
+        ? { ...st, dueDate: addDays(st.statementDate, 25) }
+        : st,
+    ),
+  };
+}
+
 export const isLegacyV1 = (raw: any): raw is V1AppState =>
   !!raw && typeof raw === 'object' && typeof raw.selectedMonth === 'string' && Array.isArray(raw.cards) && !raw.profile;
 
@@ -69,7 +107,7 @@ export interface MigrationResult {
 
 /** Chạy tuần tự các migration rồi kiểm tra schema (zod). Ném lỗi nếu dữ liệu không hợp lệ. */
 export function migrate(raw: unknown): MigrationResult {
-  if (isLegacyV1(raw)) return { state: validate(fixVibDueRule(fromLegacyV1(raw))), from: 'legacy-v1' };
+  if (isLegacyV1(raw)) return { state: validate(fixFromStatements(fixVibDueRule(fromLegacyV1(raw)))), from: 'legacy-v1' };
   const s = raw as any;
   const from = typeof s?.schemaVersion === 'number' ? s.schemaVersion : 0;
   if (from > CURRENT_SCHEMA_VERSION) throw new Error(`Dữ liệu từ phiên bản mới hơn (${from}) — hãy cập nhật app`);

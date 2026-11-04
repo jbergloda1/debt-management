@@ -165,15 +165,37 @@ export function createEngine(state: ProfileState, today: ISODate): Engine {
   return engine;
 }
 
-/** Thanh toán tối thiểu của sao kê: số ngân hàng ghi, nếu không thì theo quy tắc tối thiểu của thẻ. */
+/** Gốc các kỳ trả góp gộp sao kê có hạn trong chu kỳ của sao kê `st` (theo các khoản vay đã nhập). */
+export function billedInstallmentPrincipal(engine: Engine, ob: CreditCardObligation, st: Statement): Money {
+  const cycle = monthOf(st.dueDate);
+  return sumBy(engine.billedLoans(ob.id), (l) => sumBy(engine.schedule(l).filter((r) => monthOf(r.dueDate) === cycle), (r) => r.principal));
+}
+
+/**
+ * Thanh toán tối thiểu của sao kê: số ngân hàng ghi, nếu không thì theo quy tắc tối thiểu của thẻ.
+ * Theo sao kê VIB: tối thiểu = gốc trả góp trong kỳ + % × (dư nợ − gốc trả góp); lãi/phí trả góp nằm trong phần %.
+ */
 export function minimumDue(engine: Engine, ob: CreditCardObligation, st: Statement): Money {
   if (st.minimumDue !== undefined) return st.minimumDue;
   const rule = ob.minimumPayment ?? { percentOfStatement: 0.05, includeInstallmentsInFull: true };
-  const cycle = monthOf(st.dueDate);
-  const installments = rule.includeInstallmentsInFull
-    ? sumBy(engine.billedLoans(ob.id), (l) => sumBy(engine.schedule(l).filter((r) => monthOf(r.dueDate) === cycle), (r) => r.total))
-    : 0;
+  const installments = rule.includeInstallmentsInFull ? Math.min(st.statementBalance, billedInstallmentPrincipal(engine, ob, st)) : 0;
   const base = Math.max(0, st.statementBalance - installments);
   const min = Math.max(rule.floor ?? 0, roundMoney(base * rule.percentOfStatement)) + installments;
   return Math.min(min, st.statementBalance);
+}
+
+/**
+ * Gốc trả góp nằm trong sao kê. Sao kê có số tối thiểu ngân hàng ghi thì suy ngược từ công thức tối thiểu
+ * (bắt được cả gói trả góp chưa nhập vào app, vd. kỳ cuối của gói cũ); không khớp thì dùng các khoản đã nhập.
+ */
+export function statementInstallmentPrincipal(engine: Engine, ob: CreditCardObligation, st: Statement): Money {
+  const known = billedInstallmentPrincipal(engine, ob, st);
+  const rule = ob.minimumPayment ?? { percentOfStatement: 0.05, includeInstallmentsInFull: true };
+  const pct = rule.percentOfStatement;
+  const min = st.minimumDue;
+  if (min === undefined || !rule.includeInstallmentsInFull || pct <= 0 || pct >= 1) return known;
+  const p = Math.round((min - pct * st.statementBalance) / (1 - pct));
+  const fits = (x: number) =>
+    x >= 0 && x <= st.statementBalance && Math.abs(Math.max(rule.floor ?? 0, roundMoney((st.statementBalance - x) * pct)) + x - min) <= 1;
+  return p > known && fits(p) ? p : known;
 }

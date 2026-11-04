@@ -14,7 +14,7 @@ const withCash = (cash: number, salary = 14500000): ProfileState => ({
 const plan = (s: ProfileState) => planForSummary(createEngine(s, today), monthlySummary(s, '2026-11', today));
 const line = (p: ReturnType<typeof plan>, name: string) => p.lines.find((l) => l.label.startsWith(name))!;
 
-// Hạn trong tháng 11: Sacombank 05/11 (tối thiểu 394.560), VIB 09/11 (tối thiểu 3.570.681),
+// Hạn trong tháng 11: Sacombank 04/11 (tối thiểu 236.736), VIB 09/11 (tối thiểu 3.570.681),
 // Shinhan 15/11 (5.101.434), Vay tiêu dùng 1–3 + SFinance 19/11 — lương về 10/11.
 describe('kế hoạch trả khi thiếu tiền', () => {
   it('đủ tiền: trả đủ đúng hạn mọi khoản, không tốn thêm', () => {
@@ -26,21 +26,21 @@ describe('kế hoạch trả khi thiếu tiền', () => {
   });
 
   it('thiếu: tối thiểu + kỳ trả góp đúng hạn; tiền lương về sau hạn thẻ thì trả thêm VIB (lãi cao) trước', () => {
-    const p = plan(withCash(5500000)); // cả tháng 20.000.000, phần bắt buộc 16.819.675
-    expect(p.needMinimum).toBe(16819675);
+    const p = plan(withCash(5500000)); // cả tháng 20.000.000, phần bắt buộc 16.661.851
+    expect(p.needMinimum).toBe(16661851);
     expect(p.minimumsCovered).toBe(true);
     expect(p.lines.filter((l) => !l.isCard).every((l) => l.onTime === l.full)).toBe(true);
     // Trước 09/11 chỉ có 5,5tr → không trả hẳn được sao kê VIB (cần 7,64tr); trả thêm sau khi lương về
-    expect(line(p, 'Thẻ VIB')).toMatchObject({ onTime: 3570681, later: 3180325 });
-    expect(line(p, 'Thẻ Sacombank')).toMatchObject({ onTime: 394560, later: 0 });
-    expect(p.totalCost).toEqual({ min: 157824 + 187120, max: 251729 + 187120 });
+    expect(line(p, 'Thẻ VIB')).toMatchObject({ onTime: 3570681, later: 3338149 });
+    expect(line(p, 'Thẻ Sacombank')).toMatchObject({ onTime: 236736, later: 0 });
+    expect(p.totalCost).toEqual({ min: 157824 + 136983, max: 251729 + 136983 });
     expect(p.leftover).toBe(0);
   });
 
   it('có đủ tiền trước 09/11 để trả hẳn sao kê VIB thì trả hẳn (không mất lãi)', () => {
-    const p = plan(withCash(8000000)); // 8tr ≥ 394.560 + 7.246.783
+    const p = plan(withCash(8000000)); // 8tr ≥ 236.736 + 7.246.783
     expect(line(p, 'Thẻ VIB')).toMatchObject({ onTime: 7246783, cost: { min: 0, max: 0 } });
-    expect(line(p, 'Thẻ Sacombank')).toMatchObject({ onTime: 394560, later: 22500000 - 16819675 - 3676102 });
+    expect(line(p, 'Thẻ Sacombank')).toMatchObject({ onTime: 236736, later: 22500000 - 16661851 - 3676102 });
     expect(p.totalCost).toEqual({ min: 157824, max: 251729 });
   });
 
@@ -50,8 +50,8 @@ describe('kế hoạch trả khi thiếu tiền', () => {
     expect(p.lines.filter((l) => l.late).map((l) => l.label)).toEqual(['Thẻ Sacombank · Sao kê 10/10', 'Thẻ VIB · Sao kê 25/10']);
     expect(p.lines.filter((l) => !l.isCard).every((l) => l.onTime === l.full)).toBe(true);
     // còn 14.500.000 − 12.854.434 = 1.645.566: bù tối thiểu Sacombank (hạn sớm) rồi VIB
-    expect(line(p, 'Thẻ Sacombank')).toMatchObject({ onTime: 0, later: 394560, cost: { min: 157824 + 200000, max: 251729 + 200000 } });
-    expect(line(p, 'Thẻ VIB')).toMatchObject({ onTime: 0, later: 1251006, feeUnknown: true });
+    expect(line(p, 'Thẻ Sacombank')).toMatchObject({ onTime: 0, later: 236736, cost: { min: 157824 + 200000, max: 251729 + 200000 } });
+    expect(line(p, 'Thẻ VIB')).toMatchObject({ onTime: 0, later: 1408830, feeUnknown: true });
   });
 
   it('khoản vay trả không đủ thì để trễ hẳn khoản đó (trả thiếu vẫn là trễ), tính phí phạt đã nhập', () => {
@@ -72,7 +72,7 @@ describe('kế hoạch trả khi thiếu tiền', () => {
     const s2 = { ...s, plannedAmounts: planned };
     const after = monthlySummary(s2, '2026-11', today);
     expect(after.cash.verdict).toBe('enough');
-    expect(after.cash.leftover).toBe(3180325); // để trả thêm VIB sau khi lương về
+    expect(after.cash.leftover).toBe(3338149); // để trả thêm VIB sau khi lương về
     expect(planApplied(planForSummary(createEngine(s2, today), after), after.items)).toBe(true);
     expect(planApplied(p, sum.items)).toBe(false);
   });

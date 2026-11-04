@@ -1,6 +1,6 @@
 import type { ID, ProfileSettings, ProfileState, YearMonth } from './types';
 
-export const CURRENT_SCHEMA_VERSION = 4;
+export const CURRENT_SCHEMA_VERSION = 5;
 
 export const DEFAULT_SETTINGS: ProfileSettings = {
   defaultCardPaymentPolicy: 'current_balance',

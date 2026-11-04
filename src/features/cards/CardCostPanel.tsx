@@ -38,7 +38,7 @@ export function CardCostPanel({ card }: { card: CreditCardObligation }) {
       </div>
       <p className="muted small-text">
         Sao kê {fmt.short(c.statement.statementDate)}: dư nợ {fmt.money(c.statement.statementBalance)}
-        {c.installments > 0 && <> (gồm kỳ trả góp {fmt.money(c.installments)})</>} · tối thiểu {fmt.money(c.minimum)}
+        {c.installments > 0 && <> (gồm gốc trả góp {fmt.money(c.installments)})</>} · tối thiểu {fmt.money(c.minimum)}
         {c.minimumEstimated && ` (ước tính ${fmt.rate(pct, 0)})`} · hạn {fmt.date(c.statement.dueDate)}
         {c.monthlyRate && <> · lãi {rateText(c.monthlyRate)}/tháng</>}
       </p>
@@ -80,7 +80,7 @@ export function CardCostPanel({ card }: { card: CreditCardObligation }) {
       {c.payoff && (
         <p className="payoff">
           Nếu kỳ nào cũng chỉ trả tối thiểu ({fmt.rate(pct, 0)}
-          {card.minimumPayment?.floor ? `, ít nhất ${fmt.money(card.minimumPayment.floor)}` : ''}) và không tiêu thêm, phần chi tiêu{' '}
+          {card.minimumPayment?.floor ? `, ít nhất ${fmt.money(card.minimumPayment.floor)}` : ''}) và không tiêu thêm, phần chịu lãi{' '}
           {fmt.money(c.interestBase)} mất{' '}
           <b>
             {c.payoff.atMin.months === c.payoff.atMax.months && c.payoff.atMin.totalInterest === c.payoff.atMax.totalInterest
@@ -92,7 +92,7 @@ export function CardCostPanel({ card }: { card: CreditCardObligation }) {
       )}
       <ul className="muted small-text notes">
         <li>
-          Lãi ước tính = phần chi tiêu trong sao kê × lãi tháng (kỳ trả góp đã nằm trong số tối thiểu nên không tính). Ngân hàng tính lãi theo
+          Lãi ước tính = (dư nợ sao kê − gốc trả góp) × lãi tháng (gốc trả góp đã nằm trong số tối thiểu nên không tính). Ngân hàng tính lãi theo
           ngày, từ ngày giao dịch tới ngày trả đủ, nên số thật có thể chênh.
         </li>
         <li>Trả thiếu tối thiểu từ 10 ngày: khoản nợ bị chuyển nhóm quá hạn trên CIC, ảnh hưởng vay vốn sau này.</li>

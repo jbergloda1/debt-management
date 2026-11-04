@@ -69,7 +69,9 @@ export const appendixA: ProfileState = {
       creditLineId: 'cl-sac',
       name: 'Thẻ Sacombank',
       statementDay: 10,
-      dueRule: { type: 'statement_fixed_due', statementDay: 10, dueDay: 5 },
+      // Theo sao kê: hạn = ngày sao kê + 25 ngày (10/10 → 04/11), tối thiểu 3% dư nợ cuối kỳ
+      dueRule: { type: 'statement_offset', statementDay: 10, daysAfterStatement: 25 },
+      minimumPayment: { percentOfStatement: 0.03, includeInstallmentsInFull: false },
       // 2–3,19%/tháng; phí chậm thanh toán 6%, tối thiểu 200.000
       annualRate: 0.24,
       annualRateMax: 0.3828,
@@ -101,6 +103,8 @@ export const appendixA: ProfileState = {
       institutionId: 'inst-vib',
       name: 'Trả góp VIB',
       principal: 17648053,
+      // Phí chuyển đổi 1.763.040 (9,99%) được cộng vào gốc: dư nợ chuyển đổi thật là 15.885.013
+      netDisbursed: 15885013,
       // Chuyển đổi 06/10 → kỳ 1/9 lên sao kê 25/10, trả cùng thẻ hạn 09/11 (sao kê + 15 ngày) (chưa trả kỳ nào)
       startDate: '2026-10-06',
       periods: 9,
@@ -155,8 +159,9 @@ export const appendixA: ProfileState = {
       id: 'st-sac-2610',
       obligationId: 'card-sac',
       statementDate: '2026-10-10',
-      dueDate: '2026-11-05',
+      dueDate: '2026-11-04',
       statementBalance: 7891193,
+      minimumDue: 236736,
       currentBalance: 8366746,
       capturedAt: '2026-11-01',
     },

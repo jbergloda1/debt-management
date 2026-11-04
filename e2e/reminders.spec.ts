@@ -33,19 +33,19 @@ async function fakeNotifications(page: Page) {
 
 const notes = (page: Page) => page.evaluate(() => (window as unknown as { __notes: { title: string; body?: string }[] }).__notes);
 
-test('bật nhắc hạn → nhắc Sacombank (còn 1 ngày) và VIB (còn 5 ngày), không nhắc lại khi mở lại app', async ({ page }) => {
+test('bật nhắc hạn → nhắc Sacombank (hạn hôm nay) và VIB (còn 5 ngày), không nhắc lại khi mở lại app', async ({ page }) => {
   await fakeNotifications(page);
   await loadExample(page);
   await goTo(page, 'Cài đặt');
 
   const panel = page.locator('section.panel', { has: page.getByRole('heading', { name: 'Nhắc hạn & ứng dụng' }) });
-  await expect(panel.locator('.reminders-preview')).toContainText('Thẻ Sacombank đến hạn sau 1 ngày');
+  await expect(panel.locator('.reminders-preview')).toContainText('Thẻ Sacombank đến hạn hôm nay');
   await panel.getByRole('button', { name: 'Bật nhắc hạn' }).click();
   await expect(panel.locator('.notice')).toContainText('Đã bật nhắc hạn — vừa nhắc 2 khoản');
 
   const first = await notes(page);
-  expect(first.map((n) => n.title)).toEqual(['Thẻ Sacombank đến hạn sau 1 ngày', 'Thẻ VIB đến hạn sau 5 ngày']);
-  expect(first[0].body?.replace(/ /g, ' ')).toContain('8.366.746 ₫ · hạn 05/11/2026');
+  expect(first.map((n) => n.title)).toEqual(['Thẻ Sacombank đến hạn hôm nay', 'Thẻ VIB đến hạn sau 5 ngày']);
+  expect(first[0].body?.replace(/ /g, ' ')).toContain('8.366.746 ₫ · hạn 04/11/2026');
 
   // Mở lại app: đã nhắc rồi thì không nhắc nữa
   await page.reload();

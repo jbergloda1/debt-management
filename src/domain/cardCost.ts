@@ -1,6 +1,5 @@
-import { minimumDue, type Engine } from './engine';
-import { monthOf } from './dates';
-import { roundMoney, sumBy } from './money';
+import { minimumDue, statementInstallmentPrincipal, type Engine } from './engine';
+import { roundMoney } from './money';
 import type { CreditCardObligation, LateFeeRule, Money, Rate, Statement, YearMonth } from './types';
 
 /** Khoảng giá trị (ngân hàng công bố lãi suất dạng khoảng → lãi cũng là khoảng). */
@@ -18,9 +17,9 @@ export interface PayoffEstimate {
 
 export interface CardCostEstimate {
   statement: Statement;
-  /** Kỳ trả góp nằm trong sao kê (trả đủ trong số tối thiểu, không tính lãi) */
+  /** Gốc trả góp nằm trong sao kê (trả đủ trong số tối thiểu, không tính lãi) */
   installments: Money;
-  /** Phần chi tiêu chịu lãi khi không trả đủ = dư nợ sao kê − kỳ trả góp */
+  /** Phần chịu lãi khi không trả đủ = dư nợ sao kê − gốc trả góp (gồm chi tiêu, lãi/phí trả góp) */
   interestBase: Money;
   minimum: Money;
   /** Tối thiểu suy từ quy tắc % (sao kê không ghi số ngân hàng báo) */
@@ -71,10 +70,7 @@ export function payoffAtMinimum(balance: Money, monthlyRate: Rate, percent: Rate
 export function cardCost(engine: Engine, card: CreditCardObligation, month: YearMonth): CardCostEstimate | undefined {
   const statement = engine.currentStatement(card.id, month);
   if (!statement) return undefined;
-  const cycle = monthOf(statement.dueDate);
-  const installments = sumBy(engine.billedLoans(card.id), (l) =>
-    sumBy(engine.schedule(l).filter((r) => monthOf(r.dueDate) === cycle), (r) => r.total),
-  );
+  const installments = statementInstallmentPrincipal(engine, card, statement);
   const interestBase = Math.max(0, statement.statementBalance - installments);
   const minimum = minimumDue(engine, card, statement);
   const rate = monthlyRates(card);

@@ -17,14 +17,14 @@ test('thiếu tiền → gợi ý trả tối thiểu đúng hạn, trả thêm 
   await expect(panel).toBeVisible();
   const vib = panel.locator('tbody tr', { hasText: 'Thẻ VIB' });
   await expect(vib).toContainText(vnd(3570681));
-  await expect(vib).toContainText(vnd(3180325));
+  await expect(vib).toContainText(vnd(3338149));
   await expect(panel.locator('tbody tr', { hasText: 'Shinhan khoản 1' })).toContainText('(đủ)');
-  await expect(panel.locator('.plan-foot')).toContainText('344.944');
+  await expect(panel.locator('.plan-foot')).toContainText('294.807');
   await expect(panel.locator('.badge.red')).toHaveCount(0);
 
   await panel.getByRole('button', { name: 'Dùng kế hoạch này' }).click();
   await expect(panel).toContainText('Đang dùng kế hoạch này');
-  await expect(tile(page, 'Đủ tiền trả nợ')).toHaveText(vnd(3180325));
+  await expect(tile(page, 'Đủ tiền trả nợ')).toHaveText(vnd(3338149));
 
   await page.reload();
   await expect(panel).toContainText('Đang dùng kế hoạch này');

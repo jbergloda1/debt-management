@@ -9,7 +9,7 @@ test('tổng quan tháng 11/2026', async ({ page }) => {
   await expect(tile(page, 'Tổng dư nợ')).toHaveText(vnd(119868159));
   await expect(tile(page, 'Đủ tiền trả nợ')).toHaveText(vnd(7632037));
 
-  // Thẻ Sacombank đến hạn 05/11 → còn 1 ngày
+  // Thẻ Sacombank đến hạn hôm nay 04/11 (sao kê 10/10 + 25 ngày)
   await expect(row(page, 'Thẻ Sacombank')).toContainText('Sắp đến hạn');
   await expect(page.locator('.alert', { hasText: 'DUE_SOON' })).toHaveCount(2);
   await expect(page.locator('.alert', { hasText: 'DUE_SOON' }).first()).toContainText('Thẻ Sacombank');
