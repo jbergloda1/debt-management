@@ -32,7 +32,31 @@ interface AppStore {
 }
 
 let adapter: StorageAdapter;
-let saveTimer: ReturnType<typeof setTimeout> | undefined;
+
+/**
+ * Ghi ngay mỗi thay đổi (không hẹn giờ) để đóng app ngay sau khi bấm cũng không mất dữ liệu.
+ * Các lần ghi chạy tuần tự; nếu đang ghi mà có thay đổi mới thì chỉ ghi bản mới nhất sau đó.
+ */
+let pendingSave: ProfileState | null = null;
+let saving: Promise<void> | null = null;
+function persist(s: ProfileState, onError: (e: unknown) => void): Promise<void> {
+  pendingSave = s;
+  saving ??= (async () => {
+    while (pendingSave) {
+      const cur = pendingSave;
+      pendingSave = null;
+      await adapter.save(cur);
+    }
+  })()
+    .catch(onError)
+    .finally(() => {
+      saving = null;
+    });
+  return saving;
+}
+
+/** Chờ mọi lần ghi đang chờ hoàn tất. */
+export const flushSaves = () => saving ?? Promise.resolve();
 
 /** Kho lưu trữ đang dùng (sau init) — cho các phần cần meta như nhắc hạn. */
 export const storage = (): StorageAdapter => adapter;
@@ -84,8 +108,7 @@ export const useStore = create<AppStore>((set, get) => ({
     if (!cur) return;
     const next = fn(cur);
     set({ state: next, profiles: get().profiles.map((p) => (p.id === next.profile.id ? next.profile : p)) });
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => adapter.save(next).catch((e) => set({ notice: `Lỗi lưu dữ liệu: ${e}` })), 250);
+    persist(next, (e) => set({ notice: `Lỗi lưu dữ liệu: ${e}` }));
   },
 
   async addProfile(state) {
@@ -95,6 +118,7 @@ export const useStore = create<AppStore>((set, get) => ({
   },
 
   async replaceCurrent(next) {
+    await flushSaves();
     const cur = get().state;
     if (cur) await adapter.backup(cur.profile.id, cur, 'trước khi nhập đè');
     const merged = cur ? { ...next, profile: { ...next.profile, id: cur.profile.id } } : next;
@@ -103,15 +127,14 @@ export const useStore = create<AppStore>((set, get) => ({
   },
 
   async switchProfile(id) {
-    clearTimeout(saveTimer);
-    const cur = get().state;
-    if (cur) await adapter.save(cur);
+    await flushSaves();
     const state = await loadProfile(id);
     await adapter.setMeta(ACTIVE_KEY, id);
     set({ state });
   },
 
   async deleteProfile(id) {
+    await flushSaves();
     const cur = get().state;
     await adapter.backup(id, cur?.profile.id === id ? cur : await adapter.load(id), 'trước khi xoá profile');
     await adapter.deleteProfile(id);

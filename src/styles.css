@@ -343,3 +343,27 @@ button:focus-visible { outline:3px solid #0d948850; outline-offset:3px; }
 .backup-banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 14px 18px; border-radius: 12px; background: var(--warning-bg, #fff3d6); border: 1px solid var(--warning, #fab219); }
 .backup-banner p { margin: 4px 0 0; color: var(--text-secondary, #52514e); font-size: 13px; }
 .backup-actions { display: flex; gap: 8px; }
+
+/* ---------- sang tháng mới ---------- */
+.intro-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.rollover-banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 14px 18px; border-radius: 12px; background: var(--info-bg, #e5effb); border: 1px solid var(--accent, #2a78d6); }
+.rollover-banner p { margin: 4px 0 0; color: var(--text-secondary, #52514e); font-size: 13px; }
+.wizard-steps { margin-bottom: 16px; }
+.wizard-card { border: 1px solid var(--border, #e4e3df); border-radius: 10px; padding: 12px 14px; }
+.wizard-card h3 { margin-top: 0; }
+.wizard-review { padding-left: 18px; margin: 0 0 12px; line-height: 1.8; }
+.wizard-foot { display: flex; gap: 8px; align-items: center; }
+.wizard-progress { display: none; margin: 0 0 12px; color: var(--text-secondary, #52514e); }
+@media (max-width: 600px) {
+  .wizard-steps { display: none !important; }
+  .wizard-progress { display: block; }
+}
+.pay-list { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 8px; }
+.pay-item { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 10px 12px; border: 1px solid var(--border, #e4e3df); border-radius: 10px; }
+.pay-item.unchecked { opacity: 0.6; }
+.pay-check { display: flex; gap: 10px; align-items: flex-start; flex: 1 1 240px; cursor: pointer; }
+.pay-check input { margin-top: 3px; width: 18px; height: 18px; flex: none; }
+.pay-due { display: block; font-size: 12px; color: var(--muted, #6f6e69); margin-top: 2px; }
+.pay-fields { display: flex; gap: 8px; flex: 1 1 300px; }
+.pay-fields .field { flex: 1; min-width: 0; }
+.pay-fields input { width: 100%; }

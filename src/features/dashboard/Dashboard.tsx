@@ -9,6 +9,7 @@ import { useNav } from '../../state/nav';
 import { useStore } from '../../state/store';
 import { PaymentModal } from '../payments/PaymentModal';
 import { BackupBanner } from '../backup/BackupBanner';
+import { RolloverEntry } from '../rollover/RolloverEntry';
 
 const VERDICT = {
   enough: { text: 'Đủ tiền trả nợ', tone: 'good' as const },
@@ -126,7 +127,8 @@ export function Dashboard() {
 
   return (
     <div className="stack">
-      <div className="dashboard-intro flex flex-wrap items-end justify-between gap-4"><div><span className="eyebrow">TỔNG QUAN TÀI CHÍNH</span><h1>Chủ động hôm nay,<br className="intro-break" /> an tâm ngày mai.</h1><p className="muted">Theo dõi các khoản nợ và kế hoạch thanh toán của bạn trong một nơi.</p></div><button className="primary" onClick={() => go('obligations')}>＋ Quản lý khoản nợ</button></div>
+      <div className="dashboard-intro flex flex-wrap items-end justify-between gap-4"><div><span className="eyebrow">TỔNG QUAN TÀI CHÍNH</span><h1>Chủ động hôm nay,<br className="intro-break" /> an tâm ngày mai.</h1><p className="muted">Theo dõi các khoản nợ và kế hoạch thanh toán của bạn trong một nơi.</p></div><div className="intro-actions"><RolloverEntry variant="button" /><button className="primary" onClick={() => go('obligations')}>＋ Quản lý khoản nợ</button></div></div>
+      <RolloverEntry variant="prompt" />
       <BackupBanner />
       <section className="tiles">
         <Tile label={`Phải trả ${formatYM(state.viewMonth)}`} value={fmt.money(totals.payable)} sub={totals.planned !== totals.payable ? `Dự định ${fmt.money(totals.planned)}` : undefined} />
