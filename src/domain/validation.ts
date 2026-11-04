@@ -207,6 +207,11 @@ export function validateObligation(ob: Obligation, today: ISODate): string[] {
     if (m.type === 'fixed_installment' && m.installment * ob.periods < ob.principal) {
       errors.push('Số tiền mỗi kỳ × số kỳ nhỏ hơn số tiền vay — kiểm tra lại số tiền mỗi kỳ hoặc số kỳ');
     }
+    if (ob.link?.billedIntoStatement && !ob.link.parentObligationId) {
+      errors.push('Khoản nằm trong sao kê thẻ: hãy chọn thẻ ở "Gắn vào thẻ"');
+    } else if (ob.link?.sharesCreditLimit && !ob.link.parentObligationId && !ob.link.creditLineId) {
+      errors.push('Khoản dùng chung hạn mức: hãy chọn thẻ ở "Gắn vào thẻ"');
+    }
     if (m.type === 'custom_schedule' && m.rows.reduce((s, r) => s + r.principal, 0) !== ob.principal) {
       errors.push('Tổng gốc trong bảng nhập tay phải bằng số tiền vay');
     }

@@ -37,7 +37,7 @@ test('ghi nhận thanh toán thẻ VIB → kỳ trả góp cũng được tính 
 
   // Hạn mức: chỉ còn gốc trả góp kỳ 2–9
   await goTo(page, 'Thẻ & hạn mức');
-  const vibLine = page.locator('section.panel', { has: page.getByRole('heading', { name: 'Hạn mức VIB' }) }).first();
+  const vibLine = page.locator('section.panel', { has: page.getByRole('heading', { name: 'Hạn mức Thẻ VIB' }) }).first();
   await expect(vibLine.locator('.big-numbers')).toContainText(vnd(28800000 - 15687158));
 
   // Dữ liệu nằm trong IndexedDB → còn sau khi tải lại

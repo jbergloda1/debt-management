@@ -2,6 +2,7 @@ import { addMonths, addMonthsYM, dayOf, endOfMonth, monthOf, setDay, startOfMont
 import { CURRENT_SCHEMA_VERSION, DEFAULT_SETTINGS, newId } from './defaults';
 import type { V1AppState } from './legacy/v1';
 import { generateDueDates } from './rules';
+import { creditLineNameFor, repairLinks } from './links';
 import type { DueDateRule, Institution, Obligation, Payment, ProfileState, Statement } from './types';
 import { formatZodError, profileStateSchema } from './validation';
 
@@ -15,6 +16,8 @@ const migrations: Record<number, (s: any) => any> = {
     scenarios: s.scenarios ?? [],
     profile: { ...s.profile, settings: { ...DEFAULT_SETTINGS, ...s.profile?.settings } },
   }),
+  // Gắn lại thẻ cho trả góp tạo từ mẫu preset (thiếu thẻ → không trừ hạn mức); tên hạn mức theo tên thẻ
+  2: (s) => repairLinks(s).state,
 };
 
 export const isLegacyV1 = (raw: any): raw is V1AppState =>
@@ -72,7 +75,7 @@ export function fromLegacyV1(v1: V1AppState): ProfileState {
     const lineId = newId('cl');
     const cardId = newId('card');
     cardIds.set(c.id, cardId);
-    creditLines.push({ id: lineId, institutionId: inst.id, name: `Hạn mức ${c.name}`, limit: c.creditLimit });
+    creditLines.push({ id: lineId, institutionId: inst.id, name: creditLineNameFor(`Thẻ ${c.name}`), limit: c.creditLimit });
     const statementDay = dayOf(c.statementDate);
     obligations.push({
       ...base,

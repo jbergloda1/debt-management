@@ -19,6 +19,7 @@ import type {
   Statement,
 } from '../../domain/types';
 import { validateObligation } from '../../domain/validation';
+import { creditLineNameFor, guessParentCard } from '../../domain/links';
 import { useFmt, useProfile, useUpdate } from '../../state/hooks';
 import { useStore } from '../../state/store';
 
@@ -37,7 +38,9 @@ const INST_TYPES: { value: InstitutionType; label: string }[] = [
   { value: 'other', label: 'Khác' },
 ];
 
-type PolicyChoice ='inherit' | 'current_balance' | 'statement_balance' | 'minimum' | 'fixed';
+const PICK = '__pick';
+
+type PolicyChoice = 'inherit' | 'current_balance' | 'statement_balance' | 'minimum' | 'fixed';
 
 function blank(kind: ObligationKind, profileId: string, institutionId: string, today: string, inst?: Institution): Obligation {
   const base = { id: newId('ob'), profileId, institutionId, name: '', status: 'active' as const, createdAt: today };
@@ -98,7 +101,12 @@ export function ObligationForm({ initial, onClose }: { initial?: Obligation; onC
   const applyTemplate = (idx: number) => {
     const t = preset?.obligationTemplates[idx];
     if (!t) return;
-    setOb({ ...blank(t.kind, state.profile.id, instId, today, inst), ...structuredClone(t.defaults), name: ob.name || t.label } as Obligation);
+    const next = { ...blank(t.kind, state.profile.id, instId, today, inst), ...structuredClone(t.defaults), name: ob.name || t.label } as Obligation;
+    if (next.kind === 'installment_loan' && next.link && !next.link.parentObligationId) {
+      const card = guessParentCard(next, { obligations: state.obligations, institutions });
+      if (card) next.link = { ...next.link, parentObligationId: card.id, creditLineId: card.creditLineId };
+    }
+    setOb(next);
   };
 
   const cards = state.obligations.filter((o) => (o.kind === 'credit_card' || o.kind === 'revolving') && o.id !== ob.id);
@@ -135,11 +143,11 @@ export function ObligationForm({ initial, onClose }: { initial?: Obligation; onC
         const l: CreditLine = {
           id: final.creditLineId,
           institutionId: instId,
-          name: `Hạn mức ${final.name}`,
-          limit: limit ?? 0,
           ...s.creditLines.find((x) => x.id === final.creditLineId),
+          // Tên hạn mức luôn theo tên thẻ (đổi tên thẻ thì hạn mức đổi theo)
+          name: creditLineNameFor(final.name),
+          limit: limit ?? 0,
         };
-        l.limit = limit ?? 0;
         next.creditLines = [...s.creditLines.filter((x) => x.id !== l.id), l];
         const fs = firstStatement;
         if (!editing && fs.statementDate && fs.dueDate && fs.currentBalance !== undefined) {
@@ -303,8 +311,9 @@ export function ObligationForm({ initial, onClose }: { initial?: Obligation; onC
           <div className="form">
             <Field label="Gắn vào thẻ">
               <select
-                value={ob.link?.parentObligationId ?? ''}
+                value={ob.link ? (ob.link.parentObligationId ?? PICK) : ''}
                 onChange={(e) => {
+                  if (e.target.value === PICK) return;
                   const parent = cards.find((c) => c.id === e.target.value);
                   set({
                     link: parent
@@ -318,6 +327,8 @@ export function ObligationForm({ initial, onClose }: { initial?: Obligation; onC
                   });
                 }}
               >
+                {/* Có liên kết (ví dụ từ mẫu preset) mà chưa chọn thẻ → bắt chọn, không hiện như "độc lập" */}
+                {ob.link && !ob.link.parentObligationId && <option value={PICK} disabled>— Chọn thẻ —</option>}
                 <option value="">— Khoản vay độc lập —</option>
                 {cards.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>

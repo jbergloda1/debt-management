@@ -3,6 +3,7 @@ import { daysUntil, formatDate } from './dates';
 import { expectedCardDueDate } from './dueItems';
 import type { Engine } from './engine';
 import { expectedPaidAt } from './ledger';
+import { hasBrokenLink } from './links';
 import { loanMetrics } from './metrics';
 import { roundMoney } from './money';
 import type { MonthlySummary } from './summary';
@@ -18,7 +19,8 @@ export type AlertCode =
   | 'HIGH_APR'
   | 'MINIMUM_POLICY_INTEREST'
   | 'MISSING_STATEMENT'
-  | 'ESTIMATED_DATE';
+  | 'ESTIMATED_DATE'
+  | 'LINK_MISSING_CARD';
 
 export interface Alert {
   code: AlertCode;
@@ -78,6 +80,14 @@ export function alerts(engine: Engine, month: YearMonth, summary: MonthlySummary
   }
 
   for (const loan of engine.loans()) {
+    if (hasBrokenLink(loan, state)) {
+      out.push({
+        code: 'LINK_MISSING_CARD',
+        level: 'error',
+        message: `${loan.name}: đánh dấu nằm trong sao kê / dùng chung hạn mức nhưng chưa gắn thẻ — chưa trừ vào hạn mức. Mở Sửa và chọn thẻ ở "Gắn vào thẻ"`,
+        obligationId: loan.id,
+      });
+    }
     if (loan.opening) {
       const expected = expectedPaidAt(engine.schedule(loan), loan.opening.asOf);
       if (expected !== loan.opening.periodsPaid) {

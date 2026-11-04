@@ -57,8 +57,8 @@ export const appendixA: ProfileState = {
     { id: 'inst-sf', name: 'SFinance', type: 'finance_company' },
   ],
   creditLines: [
-    { id: 'cl-sac', institutionId: 'inst-sac', name: 'Hạn mức Sacombank', limit: 30000000 },
-    { id: 'cl-vib', institutionId: 'inst-vib', name: 'Hạn mức VIB', limit: 28800000 },
+    { id: 'cl-sac', institutionId: 'inst-sac', name: 'Hạn mức Thẻ Sacombank', limit: 30000000 },
+    { id: 'cl-vib', institutionId: 'inst-vib', name: 'Hạn mức Thẻ VIB', limit: 28800000 },
   ],
   obligations: [
     {

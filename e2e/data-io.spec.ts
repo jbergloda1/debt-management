@@ -19,7 +19,7 @@ test('xuất JSON rồi nhập lại vào trình duyệt khác cho cùng số li
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Sao lưu ngay' }).click()]);
   const file = await download.path();
   const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-  expect(data.schemaVersion).toBe(1);
+  expect(data.schemaVersion).toBe(2);
   expect(data.obligations).toHaveLength(10);
 
   // Trình duyệt sạch (context mới, IndexedDB trống)
