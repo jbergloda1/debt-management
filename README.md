@@ -24,4 +24,6 @@ npm run test:e2e   # E2E (Playwright, dùng Chrome đã cài)
 npm run build
 ```
 
-Mỗi lần push lên `main`, GitHub Actions chạy toàn bộ test rồi deploy lên GitHub Pages.
+## Deploy
+
+Deploy trên **Vercel**, kết nối với repo GitHub: mỗi lần push lên `main` Vercel chạy unit test rồi build và deploy (cấu hình trong [vercel.json](vercel.json)); Pull Request có link xem trước riêng. GitHub Actions ([.github/workflows/test.yml](.github/workflows/test.yml)) chạy thêm type-check và E2E.
