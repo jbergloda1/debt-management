@@ -2,6 +2,7 @@ import { Fragment, useState } from 'react';
 import { MoneyInput } from '../../components/inputs';
 import { AlertList, daysText, Empty, StatusBadge, Tile } from '../../components/ui';
 import { daysUntil, formatYM } from '../../domain/dates';
+import { interestCost } from '../../domain/interestCost';
 import { groupRowsByDate, type SummaryRow } from '../../domain/summary';
 import type { DueItem } from '../../domain/types';
 import { useAlerts, useEngine, useFmt, useProfile, useSummary, useUpdate } from '../../state/hooks';
@@ -34,6 +35,7 @@ export function Dashboard() {
   const rows = grouped ? groupRowsByDate(summary.rows) : summary.rows;
   const { totals, cash } = summary;
   const v = VERDICT[cash.verdict];
+  const cost = interestCost(engine, state.viewMonth);
 
   const nameOf = (id: string) => engine.obligation(id)?.name ?? id;
   const setPlanned = (key: string, value: number | undefined) =>
@@ -136,6 +138,11 @@ export function Dashboard() {
         <Tile label="Đã trả" value={fmt.money(totals.paid)} />
         <Tile label="Còn phải trả" value={fmt.money(totals.unpaid)} sub={totals.dueSoonOrOverdue ? `${totals.dueSoonOrOverdue} khoản sắp/quá hạn` : undefined} tone={totals.dueSoonOrOverdue ? 'warn' : undefined} />
         <Tile label="Tổng dư nợ" value={fmt.money(totals.debt)} />
+        <Tile
+          label="Tổng chi phí lãi"
+          value={fmt.money(cost.remaining)}
+          sub={`Còn phải trả (lãi ${fmt.money(cost.remainingInterest)} · phí ${fmt.money(cost.remainingFees)}) · tháng này ${fmt.money(cost.thisMonth)}`}
+        />
         <Tile
           label={v.text}
           value={cash.verdict === 'unknown' ? '—' : fmt.money(cash.leftover)}
