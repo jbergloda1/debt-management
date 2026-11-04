@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { minorUnitDigits } from '../domain/money';
 import { useProfile } from '../state/hooks';
 
@@ -121,13 +121,13 @@ export function Check(props: { checked: boolean; onChange: (v: boolean) => void;
   );
 }
 
+/** <label> bao quanh ô nhập để nhãn gắn với ô (trình đọc màn hình, getByLabel trong E2E). */
 export function Field(props: { label: string; hint?: string; children: ReactNode; wide?: boolean }) {
-  const id = useId();
   return (
-    <div className={`field ${props.wide ? 'wide' : ''}`} id={id}>
+    <label className={`field ${props.wide ? 'wide' : ''}`}>
       <span className="field-label">{props.label}</span>
       {props.children}
       {props.hint && <span className="field-hint">{props.hint}</span>}
-    </div>
+    </label>
   );
 }
