@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, Field, IntInput, PercentInput, Select, TextInput } from '../../components/inputs';
-import { download, downloadJson, paymentsCsv, pickFile, schedulesCsv, slug } from '../../data/io';
+import { paymentsCsv, pickFile, saveFile, schedulesCsv, slug } from '../../data/io';
+import { useBackup, type PersistState } from '../../state/backup';
 import { appendixA } from '../../data/examples/appendixA';
 import { newProfileState } from '../../domain/defaults';
 import type { CardPaymentPolicy, LoanDebtMeasure, ProfileSettings, WeekendShift } from '../../domain/types';
@@ -19,6 +20,12 @@ const LOCALES = [
   { value: 'en-US', label: 'English (en-US)' },
 ];
 
+const PERSIST_TEXT: Record<PersistState, string> = {
+  persisted: 'lâu dài (trình duyệt không tự dọn)',
+  'best-effort': 'có thể bị trình duyệt dọn khi thiếu chỗ — càng nên sao lưu',
+  unsupported: 'không rõ',
+};
+
 export function Settings() {
   const state = useProfile();
   const engine = useEngine();
@@ -30,6 +37,7 @@ export function Settings() {
   const setP = (p: Partial<typeof state.profile>) => update((x) => ({ ...x, profile: { ...x.profile, ...p } }));
   const policy = typeof s.defaultCardPaymentPolicy === 'object' ? 'current_balance' : s.defaultCardPaymentPolicy;
   const legacy = readLegacyV1();
+  const backup = useBackup();
 
   const run = async (f: () => Promise<string | void>) => {
     try {
@@ -144,12 +152,28 @@ export function Settings() {
       <RemindersPanel />
 
       <section className="panel">
-        <h2>Xuất / nhập</h2>
-        <p className="muted small-text">Dữ liệu chỉ nằm trong trình duyệt này (IndexedDB). Hãy xuất JSON định kỳ để sao lưu.</p>
+        <h2>Sao lưu & khôi phục</h2>
+        <p className="small-text">
+          Dữ liệu chỉ nằm trên thiết bị này. Sao lưu ra file JSON và cất ở nơi an toàn (iCloud Drive, Google Drive, email cho chính mình) —
+          trên điện thoại nút Sao lưu mở bảng Chia sẻ.
+        </p>
+        <p className="small-text">
+          Lần sao lưu gần nhất:{' '}
+          <b>{backup.profileId === state.profile.id && backup.lastBackupAt ? new Date(backup.lastBackupAt).toLocaleString(state.profile.locale) : 'chưa có'}</b>
+          {' · '}Bộ nhớ: {PERSIST_TEXT[backup.persist]}
+        </p>
         <div className="toolbar">
-          <button onClick={() => downloadJson(`no-${slug(state.profile.name)}-${state.viewMonth}.json`, state)}>Xuất JSON</button>
-          <button onClick={() => download(`lich-tra-${slug(state.profile.name)}.csv`, schedulesCsv(engine), 'text/csv')}>Xuất CSV lịch trả</button>
-          <button onClick={() => download(`thanh-toan-${slug(state.profile.name)}.csv`, paymentsCsv(state), 'text/csv')}>Xuất CSV thanh toán</button>
+          <button
+            className="primary"
+            onClick={() =>
+              run(async () => {
+                const r = await backup.backupNow(state);
+                return r === 'cancelled' ? undefined : 'Đã sao lưu.';
+              })
+            }
+          >
+            Sao lưu ngay
+          </button>
           <button
             onClick={() =>
               run(async () => {
@@ -158,11 +182,15 @@ export function Settings() {
               })
             }
           >
-            Nhập JSON…
+            Khôi phục từ file JSON…
           </button>
           {legacy !== null && (
             <button onClick={() => run(() => importProfileJson(JSON.stringify(legacy)))}>Nhập dữ liệu từ app v1</button>
           )}
+        </div>
+        <div className="toolbar">
+          <button onClick={() => saveFile(`lich-tra-${slug(state.profile.name)}.csv`, schedulesCsv(engine), 'text/csv')}>Xuất CSV lịch trả</button>
+          <button onClick={() => saveFile(`thanh-toan-${slug(state.profile.name)}.csv`, paymentsCsv(state), 'text/csv')}>Xuất CSV thanh toán</button>
         </div>
         {message && <p className="notice">{message}</p>}
       </section>

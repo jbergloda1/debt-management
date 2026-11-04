@@ -16,7 +16,7 @@ test('chuyển dữ liệu app v1 từ localStorage', async ({ page }) => {
 test('xuất JSON rồi nhập lại vào trình duyệt khác cho cùng số liệu', async ({ page, browser }) => {
   await loadExample(page);
   await goTo(page, 'Cài đặt');
-  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Xuất JSON' }).click()]);
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Sao lưu ngay' }).click()]);
   const file = await download.path();
   const data = JSON.parse(fs.readFileSync(file, 'utf8'));
   expect(data.schemaVersion).toBe(1);

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Field, Select } from '../../components/inputs';
-import { download, slug } from '../../data/io';
+import { saveFile, slug } from '../../data/io';
 import { addDays } from '../../domain/dates';
 import { buildIcs } from '../../domain/ics';
 import { reminderSchedule } from '../../domain/reminders';
@@ -56,7 +56,7 @@ export function RemindersPanel() {
   };
 
   const exportIcs = () => {
-    download(`nhac-tra-no-${slug(state.profile.name)}.ics`, buildIcs(engine, state.viewMonth, Number(months)), 'text/calendar');
+    saveFile(`nhac-tra-no-${slug(state.profile.name)}.ics`, buildIcs(engine, state.viewMonth, Number(months)), 'text/calendar');
   };
 
   return (

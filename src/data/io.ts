@@ -1,15 +1,42 @@
 import type { Engine } from '../domain/engine';
 import type { ProfileState } from '../domain/types';
 
+export type SaveResult = 'shared' | 'downloaded' | 'cancelled';
+
+/** Điện thoại/tablet: dùng bảng Chia sẻ (lưu vào Tệp/iCloud, gửi Zalo, email…) thay cho tải file. */
+const preferShareSheet = () =>
+  /iphone|ipad|ipod|android/i.test(navigator.userAgent) || window.matchMedia?.('(pointer: coarse)').matches;
+
+/**
+ * Lưu file: trên điện thoại mở bảng Chia sẻ nếu có, còn lại tải file.
+ * Phải gọi ngay trong sự kiện bấm (không await trước đó) — trình duyệt chỉ cho share khi có thao tác người dùng.
+ */
+export async function saveFile(filename: string, content: string, type: string): Promise<SaveResult> {
+  const file = new File([content], filename, { type });
+  if (preferShareSheet() && navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: filename });
+      return 'shared';
+    } catch (e) {
+      if ((e as Error).name === 'AbortError') return 'cancelled';
+      // Lỗi khác (ví dụ không được phép) → thử tải file
+    }
+  }
+  download(filename, content, type);
+  return 'downloaded';
+}
+
 export function download(filename: string, content: string, type: string) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([content], { type }));
   a.download = filename;
+  document.body.appendChild(a);
   a.click();
+  a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-export const downloadJson = (filename: string, data: unknown) => download(filename, JSON.stringify(data, null, 2), 'application/json');
+export const downloadJson = (filename: string, data: unknown) => saveFile(filename, JSON.stringify(data, null, 2), 'application/json');
 
 const csvCell = (v: unknown) => {
   const s = v === undefined || v === null ? '' : String(v);
@@ -38,12 +65,23 @@ export function paymentsCsv(state: ProfileState): string {
   ]);
 }
 
+/**
+ * Mở hộp chọn file. Ô input được gắn vào trang trong lúc chọn: iOS Safari có thể không bắn sự kiện
+ * `change` cho input không nằm trong DOM.
+ */
 export function pickFile(accept = 'application/json,.json'): Promise<File | null> {
   return new Promise((resolve) => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = accept;
-    input.onchange = () => resolve(input.files?.[0] ?? null);
+    input.style.cssText = 'position:fixed;left:-9999px;opacity:0';
+    document.body.appendChild(input);
+    const done = (f: File | null) => {
+      input.remove();
+      resolve(f);
+    };
+    input.addEventListener('change', () => done(input.files?.[0] ?? null), { once: true });
+    input.addEventListener('cancel', () => done(null), { once: true });
     input.click();
   });
 }
